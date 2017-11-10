@@ -29,6 +29,12 @@ class Issue
     private $gitlabId;
 
     /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Project", inversedBy="issues")
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id")
+     */
+    private $project;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
@@ -248,5 +254,28 @@ class Issue
     {
         return $this->status;
     }
-}
 
+    /**
+     * Set project
+     *
+     * @param \AppBundle\Entity\Project $project
+     *
+     * @return Issue
+     */
+    public function setProject(\AppBundle\Entity\Project $project = null)
+    {
+        $this->project = $project;
+
+        return $this;
+    }
+
+    /**
+     * Get project
+     *
+     * @return \AppBundle\Entity\Project
+     */
+    public function getProject()
+    {
+        return $this->project;
+    }
+}
