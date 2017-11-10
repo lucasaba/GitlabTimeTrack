@@ -62,11 +62,12 @@ class GitlabUpdateIssuesCommand extends ContainerAwareCommand
                     $newIssue = new Issue();
                     $newIssue->setTitle($issue->title)
                         ->setGitlabId($issue->id)
+                        ->setIssueNumber($issue->iid)
                         ->setProject($project)
                         ->setCreatedAt(new \DateTime($issue->created_at))
                         ->setUpdatedAt(new \DateTime($issue->updated_at))
                         ->setStatus($issue->state)
-                        ->setTimeEstimate($issue->time_stats->total_time_spent)
+                        ->setTimeEstimate($issue->time_stats->time_estimate)
                         ->setTotalTimeSpent($issue->time_stats->total_time_spent);
                     $this->em->persist($newIssue);
 

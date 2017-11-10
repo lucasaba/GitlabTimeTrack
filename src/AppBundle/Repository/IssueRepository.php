@@ -1,6 +1,7 @@
 <?php
 
 namespace AppBundle\Repository;
+use AppBundle\Entity\Project;
 
 /**
  * IssueRepository
@@ -10,4 +11,12 @@ namespace AppBundle\Repository;
  */
 class IssueRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findTimedIssuesRelatedToProject(Project $project)
+    {
+        return $this->getEntityManager()->createQuery(
+            'SELECT i FROM AppBundle:Issue i 
+             WHERE i.project = :project 
+             AND (i.timeEstimate > 0 OR i.totalTimeSpent > 0)'
+        )->setParameter('project', $project)->getResult();
+    }
 }

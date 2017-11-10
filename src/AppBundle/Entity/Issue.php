@@ -29,6 +29,13 @@ class Issue
     private $gitlabId;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="issue_number", type="integer")
+     */
+    private $issueNumber;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Project", inversedBy="issues")
      * @ORM\JoinColumn(name="project_id", referencedColumnName="id")
      */
@@ -277,5 +284,29 @@ class Issue
     public function getProject()
     {
         return $this->project;
+    }
+
+    /**
+     * Set issueNumber
+     *
+     * @param integer $issueNumber
+     *
+     * @return Issue
+     */
+    public function setIssueNumber($issueNumber)
+    {
+        $this->issueNumber = $issueNumber;
+
+        return $this;
+    }
+
+    /**
+     * Get issueNumber
+     *
+     * @return integer
+     */
+    public function getIssueNumber()
+    {
+        return $this->issueNumber;
     }
 }

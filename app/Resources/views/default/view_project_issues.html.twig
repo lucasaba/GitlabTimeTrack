@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block page_subtitle %}
+Project {{ project.name }} Issues
+{% endblock %}
+
+{% block page_content %}
+    {% set issuesCount = 0 %}
+    {% set issuesTotalTimeSpent = 0 %}
+    {% set issuesTimeEstimate = 0 %}
+<h2 class="page-header">Issues for project {{ project.name }}</h2>
+<div class="row">
+    <div class="col-md-8">
+        <div class="box box-solid">
+            <div class="box-header with-border">
+                <h3 class="box-title">Issues</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                {% for issue in issues %}
+                <p><code>{{ issue.issueNumber }}</code>{{ issue.title }}</p>
+                <div class="progress">
+                    {% set completition_percentage = (issue.totalTimeSpent/issue.timeEstimate)*100 %}
+                    <div class="progress-bar progress-bar-{% if issue.status=='closed' %}success{% else %}primary{% endif %} progress-bar-striped"
+                         role="progressbar"
+                         aria-valuenow="{{ issue.timeEstimate }}"
+                         aria-valuemin="0"
+                         aria-valuemax="{{ issue.totalTimeSpent }}"
+                         style="width: {{ completition_percentage }}%">
+                        <span class="sr-only">{{ completition_percentage }}% Complete (success)</span>
+                    </div>
+                </div>
+                    {% set issuesCount = issuesCount+1 %}
+                    {% set issuesTotalTimeSpent = issuesTotalTimeSpent + issue.totalTimeSpent %}
+                    {% set issuesTimeEstimate = issuesTimeEstimate + issue.timeEstimate %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="box box-solid">
+            <div class="box-header with-border">
+                <h3 class="box-title">Stats</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                <ul>
+                    <li>Total issues: {{ issuesCount }}</li>
+                    <li>Total estimated time: {{ issuesTimeEstimate }}</li>
+                    <li>Total time spent: {{ issuesTotalTimeSpent }}</li>
+                </ul>
+                <a href="{{ path('update_projects_issues', {'id': project.id}) }}" class="btn btn-primary">
+                    <i class="fa fa-reload"></i>
+                    Update
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
