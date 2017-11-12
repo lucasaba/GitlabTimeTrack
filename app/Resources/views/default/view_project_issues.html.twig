@@ -44,8 +44,8 @@ Project {{ project.name }} Issues
             <div class="box-body">
                 <ul>
                     <li>Total issues: {{ issuesCount }}</li>
-                    <li>Total estimated time: {{ issuesTimeEstimate }}</li>
-                    <li>Total time spent: {{ issuesTotalTimeSpent }}</li>
+                    <li>Total estimated time: {{ issuesTimeEstimate|gitlab_time_format }}</li>
+                    <li>Total time spent: {{ issuesTotalTimeSpent|gitlab_time_format }}</li>
                 </ul>
                 <a href="{{ path('update_projects_issues', {'id': project.id}) }}" class="btn btn-primary">
                     <i class="fa fa-reload"></i>
