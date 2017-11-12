@@ -29,6 +29,11 @@ services:
         public: true
         tags: ['controller.service_arguments']
 
+    AppBundle\Twig\AppExtension:
+        class: AppBundle\Twig\AppExtension
+        tags:
+            - { name: twig.extension }
+
     AppBundle\EventListener\GitlabTimetrackMenuItemListListener:
         tags:
             - { name: kernel.event_listener, event:theme.sidebar_setup_menu, method:onSetupMenu }
