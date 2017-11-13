@@ -50,7 +50,7 @@ class Project
     private $avatarUrl;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Issue", mappedBy="project")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Issue", mappedBy="project", cascade={"remove"})
      */
     private $issues;
 

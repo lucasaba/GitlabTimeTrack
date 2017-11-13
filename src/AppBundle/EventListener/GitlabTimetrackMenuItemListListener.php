@@ -17,6 +17,7 @@
 
 namespace AppBundle\EventListener;
 
+use AppBundle\Entity\Project;
 use Avanzu\AdminThemeBundle\Event\SidebarMenuEvent;
 use Avanzu\AdminThemeBundle\Model\MenuItemModel;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,16 +45,27 @@ class GitlabTimetrackMenuItemListListener
     protected function getMenu(Request $request) {
         $menuItems = array();
 
+        $menuItems[] = new MenuItemModel(
+            'update-projects-list',
+            'Update projects list',
+            'update_projects',
+            array(),
+            'fa fa-refresh'
+        );
+
         $projects = $this->entityManager->getRepository('AppBundle:Project')
             ->findAllSortedByTitle();
 
         foreach ($projects as $project) {
+            /**
+             * @var $project Project
+             */
             $menuItems[] = new MenuItemModel(
                     'project-'.$project->getGitlabId(),
                     $project->getName(),
                     'view_project',
                     array('id' => $project->getId()),
-                    'fa -rss-square'
+                    'fa fa-archive'
                 );
         }
 
