@@ -2,12 +2,12 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\GitlabResponse;
 use AppBundle\Entity\Issue;
 use AppBundle\Entity\Project;
 use AppBundle\Form\Type\ChooseProjectsType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Cache\Simple\FilesystemCache;
 use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
@@ -33,37 +33,30 @@ class DefaultController extends Controller
      */
     public function chooseProjectsAction(Request $request)
     {
-        $client   = $this->get('eight_points_guzzle.client.api_gitlab');
-        $nextPage = 1;
-        $gitlabProjects = [];
         $repository = $this->getDoctrine()->getRepository(Project::class);
+        $gitlabRequest = $this->get('gitlabtimetrack.request_service');
 
         /**
          * We need to fetch all projects from our GitLab server
          */
-        while ($nextPage > 0) {
-            $gitlabResponse = new GitlabResponse($client->get('projects', [
-                'query' => [
-                    'page' => $nextPage
-                ]
-            ]));
+        $gitlabProjects = $gitlabRequest->getProjects();
+        $projects = [];
 
-            foreach ($gitlabResponse->getArrayContent() as $project) {
-                $gitlabProjects[] = [
-                    'gitlabId' => $project->id,
-                    'name' => $project->name,
-                    'avatarUrl' => $project->avatar_url,
-                    'associated' => $repository->findOneBy(['gitlabId' => $project->id]) //We check if the project is already in our database
-                ];
-            }
-
-            $nextPage = $gitlabResponse->hasNext();
+        foreach ($gitlabProjects as $project) {
+            $projects[] = [
+                'gitlabId' => $project->id,
+                'name' => $project->name,
+                'avatarUrl' => $project->avatar_url,
+                'associated' => $repository->findOneBy([
+                    'gitlabId' => $project->id] //We check if the project is already in our database
+                )
+            ];
         }
 
         /**
          * Let's reorder by name the list of projects
          */
-        usort($gitlabProjects, function ($val1, $val2) {
+        usort($projects, function ($val1, $val2) {
             if($val1['name'] > $val2['name']) {
                 return 1;
             }
@@ -74,7 +67,7 @@ class DefaultController extends Controller
          * Then we build a form based on the previous data
          */
         $form = $this->createForm(ChooseProjectsType::class, null, array(
-            'gitlabProjects' => $gitlabProjects
+            'gitlabProjects' => $projects
         ));
 
         $form->handleRequest($request);
@@ -83,7 +76,7 @@ class DefaultController extends Controller
              * Handling form submission
              */
             $em = $this->getDoctrine()->getManager();
-            foreach ($gitlabProjects as $gitlabProject) {
+            foreach ($projects as $gitlabProject) {
                 $value = $form->get('project_'.$gitlabProject['gitlabId'])->getData();
                 if($value === false && $gitlabProject['associated'] != null) {
                     /**
@@ -138,56 +131,50 @@ class DefaultController extends Controller
      */
     public function updateProjectIssues(Project $project)
     {
-        $client   = $this->get('eight_points_guzzle.client.api_gitlab');
-        $nextPage = 1;
+        $gitlabRequest = $this->get('gitlabtimetrack.request_service');
+
+        /**
+         * We need to fetch all project's issues from our GitLab server
+         */
+        $gitlabProjectIssues = $gitlabRequest->getProjectsIssues($project);
+
         $em = $this->getDoctrine()->getManager();
         $updated = 0;
         $inserted = 0;
 
-        while ($nextPage > 0) {
-            $gitlabResponse = new GitlabResponse($client->get('projects/'.$project->getGitlabId().'/issues', [
-                'query' => [
-                    'page' => $nextPage
-                ]
-            ]));
+        foreach ($gitlabProjectIssues as $issue) {
+            $newIssue = $em->getRepository(Issue::class)
+                ->findOneBy(['gitlabId' => $issue->id]);
 
-            foreach ($gitlabResponse->getArrayContent() as $issue) {
-
-                $newIssue = $em->getRepository(Issue::class)
-                    ->findOneBy(['gitlabId' => $issue->id]);
-
-                if($newIssue == null) {
-                    // We have to insert a new issue
-                    $newIssue = new Issue();
-                    $newIssue->setTitle($issue->title)
-                        ->setGitlabId($issue->id)
-                        ->setIssueNumber($issue->iid)
-                        ->setProject($project)
-                        ->setCreatedAt(new \DateTime($issue->created_at))
+            if ($newIssue == null) {
+                // We have to insert a new issue
+                $newIssue = new Issue();
+                $newIssue->setTitle($issue->title)
+                    ->setGitlabId($issue->id)
+                    ->setIssueNumber($issue->iid)
+                    ->setProject($project)
+                    ->setCreatedAt(new \DateTime($issue->created_at))
+                    ->setUpdatedAt(new \DateTime($issue->updated_at))
+                    ->setStatus($issue->state)
+                    ->setTimeEstimate($issue->time_stats->time_estimate)
+                    ->setTotalTimeSpent($issue->time_stats->total_time_spent);
+                $em->persist($newIssue);
+                $inserted++;
+            } else {
+                // We have to test if the issue has been updated
+                $lastUpdated = new \DateTime($issue->updated_at);
+                /**
+                 * @var $newIssue Issue
+                 */
+                if ($lastUpdated->diff($newIssue->getUpdatedAt())->s > 2) {
+                    $newIssue->setStatus($issue->state)
                         ->setUpdatedAt(new \DateTime($issue->updated_at))
-                        ->setStatus($issue->state)
                         ->setTimeEstimate($issue->time_stats->time_estimate)
                         ->setTotalTimeSpent($issue->time_stats->total_time_spent);
                     $em->persist($newIssue);
-                    $inserted++;
-                } else {
-                    // We have to test if the issue has been updated
-                    $lastUpdated = new \DateTime($issue->updated_at);
-                    /**
-                     * @var $newIssue Issue
-                     */
-                    if($lastUpdated->diff($newIssue->getUpdatedAt())->s > 2) {
-                        $newIssue->setStatus($issue->state)
-                            ->setUpdatedAt(new \DateTime($issue->updated_at))
-                            ->setTimeEstimate($issue->time_stats->time_estimate)
-                            ->setTotalTimeSpent($issue->time_stats->total_time_spent);
-                        $em->persist($newIssue);
-                        $updated++;
-                    }
-
+                    $updated++;
                 }
             }
-            $nextPage = $gitlabResponse->hasNext();
         }
 
         $em->flush();
@@ -201,5 +188,18 @@ class DefaultController extends Controller
         }
 
         return $this->redirectToRoute('view_project', ['id' => $project->getId()]);
+    }
+
+    /**
+     * @Route("/clear-projects-cache", name="clear_projects_cache")
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function clearProjectsCacheAction()
+    {
+        $cache = new FilesystemCache();
+        $cache->delete('gitlab.projects_list');
+
+        return $this->redirectToRoute('update_projects');
     }
 }

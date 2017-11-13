@@ -2,7 +2,6 @@
 
 namespace AppBundle\Command;
 
-use AppBundle\Entity\GitlabResponse;
 use AppBundle\Entity\Issue;
 use AppBundle\Entity\Project;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -42,51 +41,44 @@ class GitlabUpdateIssuesCommand extends ContainerAwareCommand
 
     private function fetchOrUpdateIssues(Project $project, OutputInterface $output)
     {
-        $client   = $this->getContainer()->get('eight_points_guzzle.client.api_gitlab');
-        $nextPage = 1;
+        $gitlabRequestService = $this->getContainer()->get('gitlabtimetrack.request_service');
 
-        while ($nextPage > 0) {
-            $gitlabResponse = new GitlabResponse($client->get('projects/'.$project->getGitlabId().'/issues', [
-                'query' => [
-                    'page' => $nextPage
-                ]
-            ]));
+        foreach ($gitlabRequestService->getProjectsIssues($project) as $issue) {
 
-            foreach ($gitlabResponse->getArrayContent() as $issue) {
+            $newIssue = $this->em->getRepository(Issue::class)
+                ->findOneBy(['gitlabId' => $issue->id]);
 
-                $newIssue = $this->em->getRepository(Issue::class)
-                    ->findOneBy(['gitlabId' => $issue->id]);
+            if($newIssue == null) {
+                // We have to insert a new issue
+                $newIssue = new Issue();
+                $newIssue->setTitle($issue->title)
+                    ->setGitlabId($issue->id)
+                    ->setIssueNumber($issue->iid)
+                    ->setProject($project)
+                    ->setCreatedAt(new \DateTime($issue->created_at))
+                    ->setUpdatedAt(new \DateTime($issue->updated_at))
+                    ->setStatus($issue->state)
+                    ->setTimeEstimate($issue->time_stats->time_estimate)
+                    ->setTotalTimeSpent($issue->time_stats->total_time_spent);
+                $this->em->persist($newIssue);
 
-                if($newIssue == null) {
-                    // We have to insert a new issue
-                    $newIssue = new Issue();
-                    $newIssue->setTitle($issue->title)
-                        ->setGitlabId($issue->id)
-                        ->setIssueNumber($issue->iid)
-                        ->setProject($project)
-                        ->setCreatedAt(new \DateTime($issue->created_at))
-                        ->setUpdatedAt(new \DateTime($issue->updated_at))
+                $output->writeln("New issue fetched: ".$project->getName().' - '.$newIssue->getTitle());
+            } else {
+                // We have to test if the issue has been updated
+                $lastUpdated = new \DateTime($issue->updated_at);
+                if($lastUpdated->diff($newIssue->getUpdatedAt())->s > 2) {
+                    $output->writeln("Updating issue: ".$project->getName().' - '.$newIssue->getTitle());
+                    /**
+                     * @var $newIssue Issue
+                     */
+                    $newIssue->setUpdatedAt(new \DateTime($issue->updated_at))
                         ->setStatus($issue->state)
                         ->setTimeEstimate($issue->time_stats->time_estimate)
                         ->setTotalTimeSpent($issue->time_stats->total_time_spent);
                     $this->em->persist($newIssue);
-
-                    $output->writeln("New issue fetched: ".$project->getName().' - '.$newIssue->getTitle());
-                } else {
-                    // We have to test if the issue has been updated
-                    $lastUpdated = new \DateTime($issue->updated_at);
-                    if($lastUpdated->diff($newIssue->getUpdatedAt())->s > 2) {
-                        $output->writeln("Updating issue: ".$project->getName().' - '.$newIssue->getTitle());
-                        $newIssue->setUpdatedAt(new \DateTime($issue->updated_at))
-                            ->setStatus($issue->state)
-                            ->setTimeEstimate($issue->time_stats->time_estimate)
-                            ->setTotalTimeSpent($issue->time_stats->total_time_spent);
-                        $this->em->persist($newIssue);
-                    }
-
                 }
+
             }
-            $nextPage = $gitlabResponse->hasNext();
         }
 
         $this->em->flush();

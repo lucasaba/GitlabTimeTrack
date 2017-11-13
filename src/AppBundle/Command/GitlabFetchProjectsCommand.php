@@ -2,7 +2,6 @@
 
 namespace AppBundle\Command;
 
-use AppBundle\Entity\GitlabResponse;
 use AppBundle\Entity\Project;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,33 +24,25 @@ class GitlabFetchProjectsCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $client   = $this->getContainer()->get('eight_points_guzzle.client.api_gitlab');
+        $gitlabRequestService = $this->getContainer()->get('gitlabtimetrack.request_service');
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $nextPage = 1;
 
-        while ($nextPage > 0) {
-            $gitlabResponse = new GitlabResponse($client->get('projects', [
-                'query' => [
-                    'page' => $nextPage
-                ]
-            ]));
 
-            foreach ($gitlabResponse->getArrayContent() as $project) {
-                $newProject = $em->getRepository(Project::class)
-                    ->findOneBy(['gitlabId' => $project->id]);
+        foreach ($gitlabRequestService->getProjects() as $project) {
+            $newProject = $em->getRepository(Project::class)
+                ->findOneBy(['gitlabId' => $project->id]);
 
-                if($newProject == null) {
-                    $newProject = new Project();
-                    $newProject->setName($project->name)
-                        ->setGitlabId($project->id)
-                        ->setAvatarUrl($project->avatar_url);
-                    $em->persist($newProject);
+            if($newProject == null) {
+                $newProject = new Project();
+                $newProject->setName($project->name)
+                    ->setGitlabId($project->id)
+                    ->setAvatarUrl($project->avatar_url);
+                $em->persist($newProject);
 
-                    $output->writeln("New project fetched: ".$project->name);
-                }
+                $output->writeln("New project fetched: ".$project->name);
             }
-            $nextPage = $gitlabResponse->hasNext();
         }
+
 
         $em->flush();
         $output->writeln("All project persisted");

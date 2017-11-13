@@ -1,7 +1,6 @@
 # Learn more about services, parameters and containers at
 # https://symfony.com/doc/current/service_container.html
 parameters:
-    #parameter_name: value
 
 services:
     # default configuration for services in *this* file
@@ -42,3 +41,7 @@ services:
     # AppBundle\Service\ExampleService:
     #     arguments:
     #         $someArgument: 'some_value'
+    gitlabtimetrack.request_service:
+        class: AppBundle\Service\GitlabRequestService
+        arguments: [ '@eight_points_guzzle.client.api_gitlab', '@monolog.logger' ]
+        public: true
