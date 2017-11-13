@@ -18,6 +18,9 @@ class AppExtension extends \Twig_Extension
      */
     public function gitlabTimeFormatFilter($number)
     {
+        if($number == null) {
+            return 0;
+        }
         $output = '';
         $days = floor($number/(60*60*24));
         if ($days > 0) {
