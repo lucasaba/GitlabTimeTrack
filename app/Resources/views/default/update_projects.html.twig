@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block page_subtitle %}
+    Choose projects
+{% endblock %}
+
+{% block page_content %}
+    <h2 class="page-header">Choose the projects to monitor</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Projects</h3>
+                </div>
+                {{ form_start(form) }}
+                <div class="box-body">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="check-uncheck-all">
+                                <label for="check-uncheck-all">Check/Uncheck all</label>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for formProject in form.children %}
+                            <tr>
+                                <td>
+                                    {{ form_row(formProject) }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-reload"></i>
+                        Update projects list
+                    </button>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="box box-solid">
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts_inline %}
+    <script type="text/javascript">
+        $('document').ready(function() {
+            var unchecked = true; //Pretend all values are unchecked
+            $('#check-uncheck-all').change(function() {
+                unchecked = !unchecked; //Negate the var
+                $('.checkbox').each(function () {
+                    this.checked = !unchecked;
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
