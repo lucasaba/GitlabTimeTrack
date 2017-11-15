@@ -153,20 +153,22 @@ class DefaultController extends Controller
                     ->setGitlabId($issue->id)
                     ->setIssueNumber($issue->iid)
                     ->setProject($project)
-                    ->setCreatedAt(new \DateTime($issue->created_at))
-                    ->setUpdatedAt(new \DateTime($issue->updated_at))
+                    ->setCreatedAt($this->gitlabTimeToW3CTime($issue->created_at))
+                    ->setUpdatedAt($this->gitlabTimeToW3CTime($issue->updated_at))
                     ->setStatus($issue->state)
                     ->setTimeEstimate($issue->time_stats->time_estimate)
                     ->setTotalTimeSpent($issue->time_stats->total_time_spent);
                 $em->persist($newIssue);
                 $inserted++;
             } else {
-                // We have to test if the issue has been updated
-                $lastUpdated = new \DateTime($issue->updated_at);
+                /**
+                 * We have to test if the issue has been updated
+                 */
+                $lastUpdated = $this->gitlabTimeToW3CTime($issue->updated_at);
                 /**
                  * @var $newIssue Issue
                  */
-                if ($lastUpdated->diff($newIssue->getUpdatedAt())->s > 2) {
+                if ($lastUpdated->getTimestamp() > $newIssue->getUpdatedAt()->getTimestamp()) {
                     $newIssue->setStatus($issue->state)
                         ->setUpdatedAt(new \DateTime($issue->updated_at))
                         ->setTimeEstimate($issue->time_stats->time_estimate)
@@ -201,5 +203,24 @@ class DefaultController extends Controller
         $cache->delete('gitlab.projects_list');
 
         return $this->redirectToRoute('update_projects');
+    }
+
+    /**
+     * We need to simplify the datetime handling because
+     * gitlab is much more precise then MySql
+     *
+     *
+     * @param $gitlabTime string
+     * @return \DateTime
+     */
+    private function gitlabTimeToW3CTime($gitlabTime)
+    {
+        /**
+         * Gitlab uses RFC3339_EXTENDED date format
+         * 'Y-m-d\TH:i:s.vP'
+         * We have to transform it into a much simplier ('Y-m-d\TH:i:s') format
+         */
+        $date = new \DateTime($gitlabTime);
+        return new \DateTime($date->format('Y-m-d\TH:i:s'));
     }
 }
