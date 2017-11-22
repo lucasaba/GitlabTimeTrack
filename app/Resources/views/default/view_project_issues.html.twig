@@ -21,7 +21,11 @@
                             Estimeted: <span class="badge">{{ issue.timeEstimate|gitlab_time_format }}</span>
                             Spent: <span class="badge">{{ issue.totalTimeSpent|gitlab_time_format }}</span>
                         </p>
-                        <p><code>{{ issue.issueNumber }}</code>{{ issue.title }}</p>
+                        <p>
+                            <i class="fa fa-check text-{% if issue.status == 'opened' %}gray{% else %}green{% endif %}"></i>
+                            <code>{{ issue.issueNumber }}</code>
+                            {{ issue.title }}
+                        </p>
                         {% if issue.timeEstimate > 0 %}
                             <div class="progress">
                                 {% set completition_percentage = (issue.totalTimeSpent/issue.timeEstimate)*100 %}
@@ -64,9 +68,13 @@
                         <li>Total time spent: {{ issuesTotalTimeSpent|gitlab_time_format }}</li>
                     </ul>
                     <a href="{{ path('update_projects_issues', {'id': project.id}) }}" class="btn btn-primary">
-                        <i class="fa fa-reload"></i>
+                        <i class="fa fa-refresh"></i>
                         Update
-                    </a>
+                    </a>{% if executable %}
+                    <a href="{{ path('export_project_to_pdf', {'id': project.id}) }}" class="btn btn-primary">
+                        <i class="fa fa-file-pdf-o"></i>
+                        Export to PDF
+                    </a>{% endif %}
                 </div>
             </div>
         </div>

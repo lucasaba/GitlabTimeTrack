@@ -5,6 +5,8 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Issue;
 use AppBundle\Entity\Project;
 use AppBundle\Form\Type\ChooseProjectsType;
+use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
+use Knp\Snappy\Pdf;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Cache\Simple\FilesystemCache;
@@ -12,6 +14,13 @@ use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
+    private $snappyPdf;
+
+    public function __construct(Pdf $snappyPdf)
+    {
+        $this->snappyPdf = $snappyPdf;
+    }
+
     /**
      * @Route("/", name="homepage")
      */
@@ -120,7 +129,39 @@ class DefaultController extends Controller
     {
         $issues = $this->getDoctrine()->getRepository('AppBundle:Issue')->findTimedIssuesRelatedToProject($project);
 
-        return $this->render('default/view_project_issues.html.twig', ['issues' => $issues, 'project' => $project]);
+        $executable = $this->pdfCanBeGenerated();
+
+        return $this->render('default/view_project_issues.html.twig', [
+            'issues' => $issues,
+            'project' => $project,
+            'executable' => $executable
+        ]);
+    }
+
+    /**
+     * @Route("/project/{id}/export-to-pdf", name="export_project_to_pdf")
+     *
+     * @param Project $project
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function exportProjectToPdfAction(Project $project)
+    {
+        if(! $this->pdfCanBeGenerated()) {
+            throw new \Exception("You need wkhtmltopdf to export the PDF");
+        }
+
+        $issues = $this->getDoctrine()->getRepository('AppBundle:Issue')->findTimedIssuesRelatedToProject($project);
+
+        $html = $this->renderView('default/pdf_project_issues.html.twig', array(
+            'issues'  => $issues,
+            'projetc' => $project
+        ));
+
+        return new PdfResponse(
+            $this->snappyPdf->getOutputFromHtml($html),
+            'issues.pdf'
+        );
     }
 
     /**
@@ -222,5 +263,20 @@ class DefaultController extends Controller
          */
         $date = new \DateTime($gitlabTime);
         return new \DateTime($date->format('Y-m-d\TH:i:s'));
+    }
+
+    /**
+     * Test is wkhtmltopdf exists
+     *
+     * @return bool
+     */
+    private function pdfCanBeGenerated()
+    {
+        $executable = $this->getParameter('knp_snappy.pdf.binary');
+        if(`which $executable`){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

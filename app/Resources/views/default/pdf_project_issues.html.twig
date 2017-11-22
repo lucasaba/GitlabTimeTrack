@@ -1,0 +1,39 @@
+{% extends 'pdf_export_base.html.twig' %}
+
+{% block page_content %}
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Est.</th>
+            <th>Spe.</th>
+            <th>Title</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% set totalEstimate = 0 %}
+        {% set totalSpent = 0 %}
+        {% for issue in issues %}
+            <tr>
+                <td>
+                    {{ issue.issueNumber }}
+                </td>
+                <td class="right-align">{% if issue.timeEstimate > 0 %}{{ issue.timeEstimate|gitlab_time_format }}{% endif %}</td>
+                <td class="right-align">{% if issue.totalTimeSpent > 0 %}{{ issue.totalTimeSpent|gitlab_time_format }}{% endif %}</td>
+                <td>{{ issue.title }}</td>
+            </tr>
+            {% set totalEstimate = totalEstimate + issue.timeEstimate %}
+            {% set totalSpent = totalSpent + issue.totalTimeSpent %}
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr>
+            <th>&nbsp;</th>
+            <th class="right-align">{{ totalEstimate|gitlab_time_format }}</th>
+            <th class="right-align">{{ totalSpent|gitlab_time_format }}</th>
+            <th>&nbsp;</th>
+        </tr>
+        </tfoot>
+    </table>
+{% endblock page_content %}
+
