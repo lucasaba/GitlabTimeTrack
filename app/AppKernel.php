@@ -17,6 +17,7 @@ class AppKernel extends Kernel
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new EightPoints\Bundle\GuzzleBundle\EightPointsGuzzleBundle(),
             new Avanzu\AdminThemeBundle\AvanzuAdminThemeBundle(),
+            new Knp\Bundle\SnappyBundle\KnpSnappyBundle(),
             new AppBundle\AppBundle(),
         ];
 

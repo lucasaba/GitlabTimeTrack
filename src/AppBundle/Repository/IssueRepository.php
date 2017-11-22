@@ -16,7 +16,8 @@ class IssueRepository extends \Doctrine\ORM\EntityRepository
         return $this->getEntityManager()->createQuery(
             'SELECT i FROM AppBundle:Issue i 
              WHERE i.project = :project 
-             AND (i.timeEstimate > 0 OR i.totalTimeSpent > 0)'
+             AND (i.timeEstimate > 0 OR i.totalTimeSpent > 0)
+             ORDER BY i.gitlabId DESC'
         )->setParameter('project', $project)->getResult();
     }
 }
