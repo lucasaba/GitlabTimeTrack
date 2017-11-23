@@ -18,7 +18,7 @@
                 <div class="box-body">
                     {% for issue in issues %}
                         <p>
-                            Estimeted: <span class="badge">{{ issue.timeEstimate|gitlab_time_format }}</span>
+                            Estimated: <span class="badge">{{ issue.timeEstimate|gitlab_time_format }}</span>
                             Spent: <span class="badge">{{ issue.totalTimeSpent|gitlab_time_format }}</span>
                         </p>
                         <p>
