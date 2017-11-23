@@ -6,27 +6,32 @@ A Symfony project to display time track info from Gitlab Projects
 Installation
 ------------
 
-Clone the repo:
+Install from packagist (still in development stage)
 
-`git clone https://www.github.com/lucasaba/gitlab-timetrack`
+`composer.phar create-project lucasaba/gitlab-time-track.git -s dev`
 
-Install the dependences with [composer](https://getcomposer.org/):
+You'll have to provide some information:
 
+* database_host (127.0.0.1): 
+* database_port (null): 
+* database_name (symfony): 
+* database_user (root): 
+* database_password (null): 
+* secret (ThisTokenIsNotSoSecretChangeIt): 
+* gitlab_token (yourSuperSecretGitlabToken): 
+* gitlab_server_url ('https://your.gitlab.server.host/api/v4'):
+
+The gitlab token can be obteined in `https://your.gitlab.server.host/profile/personal_access_tokens` 
+
+Enter in the project folder
 ```bash
-user@server:/path/to/gitlab-timetrack-project$ composer install
+cd gitlab-time-track.git
 ```
-
-Create the schema
+Create the database and the schema
 
 ```bash
+user@server:/path/to/gitlab-timetrack-project$ php bin/console doctrine:database:create
 user@server:/path/to/gitlab-timetrack-project$ php bin/console doctrine:schema:create
-
-```
-
-Fetch the data from your gitlab server:
-
-```bash
-user@server:/path/to/gitlab-timetrack-project$ php bin/console gitlab:fetch:all
 
 ```
 
