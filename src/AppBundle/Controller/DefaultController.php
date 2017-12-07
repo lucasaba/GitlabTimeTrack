@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Issue;
 use AppBundle\Entity\Project;
 use AppBundle\Form\Type\ChooseProjectsType;
+use AppBundle\Service\GitlabRequestService;
 use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
 use Knp\Snappy\Pdf;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -14,11 +15,20 @@ use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
+    /**
+     * @var Pdf
+     */
     private $snappyPdf;
 
-    public function __construct(Pdf $snappyPdf)
+    /**
+     * @var GitlabRequestService
+     */
+    private $gitlabRequestService;
+
+    public function __construct(Pdf $snappyPdf, GitlabRequestService $gitlabRequestService)
     {
         $this->snappyPdf = $snappyPdf;
+        $this->gitlabRequestService = $gitlabRequestService;
     }
 
     /**
@@ -43,12 +53,11 @@ class DefaultController extends Controller
     public function chooseProjectsAction(Request $request)
     {
         $repository = $this->getDoctrine()->getRepository(Project::class);
-        $gitlabRequest = $this->get('gitlabtimetrack.request_service');
 
         /**
          * We need to fetch all projects from our GitLab server
          */
-        $gitlabProjects = $gitlabRequest->getProjects();
+        $gitlabProjects = $this->gitlabRequestService->getProjects();
         $projects = [];
 
         foreach ($gitlabProjects as $project) {
@@ -172,12 +181,10 @@ class DefaultController extends Controller
      */
     public function updateProjectIssues(Project $project)
     {
-        $gitlabRequest = $this->get('gitlabtimetrack.request_service');
-
         /**
          * We need to fetch all project's issues from our GitLab server
          */
-        $gitlabProjectIssues = $gitlabRequest->getProjectsIssues($project);
+        $gitlabProjectIssues = $this->gitlabRequestService->getProjectsIssues($project);
 
         $em = $this->getDoctrine()->getManager();
         $updated = 0;
