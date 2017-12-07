@@ -34,3 +34,4 @@ services:
     #         $someArgument: 'some_value'
     AppBundle\Service\GitlabRequestService:
         arguments: [ '@eight_points_guzzle.client.api_gitlab', '@monolog.logger' ]
+        public: true
