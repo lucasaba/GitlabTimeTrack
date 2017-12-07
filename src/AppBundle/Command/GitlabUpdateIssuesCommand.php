@@ -4,6 +4,7 @@ namespace AppBundle\Command;
 
 use AppBundle\Entity\Issue;
 use AppBundle\Entity\Project;
+use AppBundle\Service\GitlabRequestService;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -41,7 +42,7 @@ class GitlabUpdateIssuesCommand extends ContainerAwareCommand
 
     private function fetchOrUpdateIssues(Project $project, OutputInterface $output)
     {
-        $gitlabRequestService = $this->getContainer()->get('gitlabtimetrack.request_service');
+        $gitlabRequestService = $this->getContainer()->get(GitlabRequestService::class);
 
         foreach ($gitlabRequestService->getProjectsIssues($project) as $issue) {
 

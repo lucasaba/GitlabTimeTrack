@@ -3,6 +3,7 @@
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Project;
+use AppBundle\Service\GitlabRequestService;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,7 +25,7 @@ class GitlabFetchProjectsCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $gitlabRequestService = $this->getContainer()->get('gitlabtimetrack.request_service');
+        $gitlabRequestService = $this->getContainer()->get(GitlabRequestService::class);
         $em = $this->getContainer()->get('doctrine')->getManager();
 
 
