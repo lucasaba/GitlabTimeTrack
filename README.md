@@ -3,6 +3,8 @@ Gitlab Timetrack
 
 A Symfony project to display time track info from Gitlab Projects
 
+![Gitlab TimeTrack screenshot](src/AppBundle/Resources/images/screenshot.png)
+
 Installation
 ------------
 
