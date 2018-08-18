@@ -36,8 +36,18 @@ class DefaultController extends Controller
      */
     public function indexAction()
     {
+        $manager = $this->getDoctrine()->getManager();
+        $numberOfProjects = $manager->getRepository('AppBundle:Project')->countProjects();
+        $numberOfIssues = $manager->getRepository('AppBundle:Issue')->countIssues();
+        $totalTimeSpent = $manager->getRepository('AppBundle:Issue')->countTimeSpent();
+        $totaleEstimatedTime = $manager->getRepository('AppBundle:Issue')->countEstimatedTime();
+
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
+            'numberOfProjects' => $numberOfProjects,
+            'numberOfIssues' => $numberOfIssues,
+            'totalTimeSpent' => $totalTimeSpent,
+            'totaleEstimatedTime' => $totaleEstimatedTime
         ]);
     }
 

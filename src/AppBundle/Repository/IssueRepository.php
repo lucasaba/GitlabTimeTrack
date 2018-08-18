@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 use AppBundle\Entity\Project;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 
 /**
  * IssueRepository
@@ -19,5 +21,71 @@ class IssueRepository extends \Doctrine\ORM\EntityRepository
              AND (i.timeEstimate > 0 OR i.totalTimeSpent > 0)
              ORDER BY i.gitlabId DESC'
         )->setParameter('project', $project)->getResult();
+    }
+
+    /**
+     * Returns the number of issues monitored by GitlabTimeTrack
+     *
+     * @return int|mixed
+     */
+    public function countIssues()
+    {
+        $qry = $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->getQuery();
+
+        try {
+            $result = $qry->getSingleScalarResult();
+        } catch (NoResultException $e) {
+            return 0;
+        }catch (NonUniqueResultException $e) {
+            return 0;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns the number of minutes spent on all issues
+     *
+     * @return int|mixed
+     */
+    public function countTimeSpent()
+    {
+        $qry = $this->createQueryBuilder('i')
+            ->select('SUM(i.totalTimeSpent)')
+            ->getQuery();
+
+        try {
+            $result = $qry->getSingleScalarResult();
+        } catch (NoResultException $e) {
+            return 0;
+        }catch (NonUniqueResultException $e) {
+            return 0;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns the estimated number of minutes to be spent on all issues
+     *
+     * @return int|mixed
+     */
+    public function countEstimatedTime()
+    {
+        $qry = $this->createQueryBuilder('i')
+            ->select('SUM(i.timeEstimate)')
+            ->getQuery();
+
+        try {
+            $result = $qry->getSingleScalarResult();
+        } catch (NoResultException $e) {
+            return 0;
+        }catch (NonUniqueResultException $e) {
+            return 0;
+        }
+
+        return $result;
     }
 }

@@ -2,6 +2,9 @@
 
 namespace AppBundle\Repository;
 
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+
 /**
  * ProjectRepository
  *
@@ -16,5 +19,27 @@ class ProjectRepository extends \Doctrine\ORM\EntityRepository
             ->createQuery(
                 "SELECT p FROM AppBundle:Project p  ORDER BY p.name $order"
             )->getResult();
+    }
+
+    /**
+     * Returns the number of project monitored by GitlabTimeTrack
+     *
+     * @return int|mixed
+     */
+    public function countProjects()
+    {
+        $qry = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->getQuery();
+
+        try {
+            $result = $qry->getSingleScalarResult();
+        } catch (NoResultException $e) {
+            return 0;
+        }catch (NonUniqueResultException $e) {
+            return 0;
+        }
+
+        return $result;
     }
 }
