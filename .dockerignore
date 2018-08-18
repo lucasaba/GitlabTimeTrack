@@ -1,0 +1,5 @@
+.git
+vendor
+tests
+Dockerfile
+docker-compose.yml
