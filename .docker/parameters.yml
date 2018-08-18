@@ -1,0 +1,13 @@
+parameters:
+    database_host: '%env(DB_HOST)%'
+    database_port: '%env(DB_PORT)%'
+    database_name: '%env(DB_NAME)%'
+    database_user: '%env(DB_USER)%'
+    database_password: '%env(DB_PASSWORD)%'
+
+    # A secret key that's used to generate certain security-related tokens
+    secret: '%env(SECRET_KEY)%'
+
+    # Gitlab configuration
+    gitlab_token: '%env(GITLAB_TOKEN)%'
+    gitlab_server_url: '%env(GITLAB_SERVER_URL)%'
