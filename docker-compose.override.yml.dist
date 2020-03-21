@@ -7,9 +7,3 @@ services:
       GITLAB_SERVER_URL: 'https://gitlab.com'
       WKHTMLTOPDF_PATH: '/usr/bin/wkhtmltopdf'
       WKHTMLTOIMAGE_PATH: '/usr/bin/wkhtmltoimage'
-  php-fpm:
-    environment:
-      GITLAB_TOKEN: EnterYourSecretTokenHere
-      GITLAB_SERVER_URL: 'https://gitlab.com'
-      WKHTMLTOPDF_PATH: '/usr/bin/wkhtmltopdf'
-      WKHTMLTOIMAGE_PATH: '/usr/bin/wkhtmltoimage'

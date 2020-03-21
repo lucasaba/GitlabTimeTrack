@@ -66,8 +66,10 @@ shell:
 	@docker-compose exec -w "/var/www" $(PHP) bash
 
 install:
+	@docker-compose build
+	@docker-compose up -d
 	@docker-compose exec -w "/var/www" $(PHP) composer install
-	@docker-compose exec -w "/var/www" $(PHP) bin/console doctrine:schema:drop
+	@docker-compose exec -w "/var/www" $(PHP) bin/console doctrine:schema:drop --force
 	@docker-compose exec -w "/var/www" $(PHP) bin/console doctrine:schema:create
 
 docker-start:

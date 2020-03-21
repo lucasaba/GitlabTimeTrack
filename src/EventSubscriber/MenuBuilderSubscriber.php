@@ -34,7 +34,7 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
             'Update projects list',
             'update_projects',
             [],
-            'fas fas-refresh'
+            'fas fa-sync'
         );
 
         $event->addItem($menu);
