@@ -3,9 +3,9 @@ php:
   - '7.2'
 
 install:
-  - composer install
+  - composer install --no-scripts
 
 script:
   - ./vendor/bin/phpstan analyse
   - ./bin/phpunit
-  - ./vendor/bin/phpcs src/
+  - ./vendor/bin/phpcs
