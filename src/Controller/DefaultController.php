@@ -148,47 +148,7 @@ class DefaultController extends AbstractController
          */
         $gitlabProjectIssues = $this->gitlabRequestService->getProjectsIssues($project);
 
-        $updated = 0;
-        $inserted = 0;
-
-        foreach ($gitlabProjectIssues as $issue) {
-            $newIssue = $this->entityManager->getRepository(Issue::class)
-                ->findOneBy(['gitlabId' => $issue->id]);
-
-            if ($newIssue == null) {
-                // We have to insert a new issue
-                $newIssue = new Issue();
-                $newIssue->setTitle($issue->title)
-                    ->setGitlabId($issue->id)
-                    ->setIssueNumber($issue->iid)
-                    ->setProject($project)
-                    ->setCreatedAt($this->gitlabTimeToW3CTime($issue->created_at))
-                    ->setUpdatedAt($this->gitlabTimeToW3CTime($issue->updated_at))
-                    ->setStatus($issue->state)
-                    ->setTimeEstimate($issue->time_stats->time_estimate)
-                    ->setTotalTimeSpent($issue->time_stats->total_time_spent);
-                $this->entityManager->persist($newIssue);
-                $inserted++;
-            } else {
-                /**
-                 * We have to test if the issue has been updated
-                 */
-                $lastUpdated = $this->gitlabTimeToW3CTime($issue->updated_at);
-                /**
-                 * @var $newIssue Issue
-                 */
-                if ($lastUpdated->getTimestamp() > $newIssue->getUpdatedAt()->getTimestamp()) {
-                    $newIssue->setStatus($issue->state)
-                        ->setUpdatedAt(new DateTime($issue->updated_at))
-                        ->setTimeEstimate($issue->time_stats->time_estimate)
-                        ->setTotalTimeSpent($issue->time_stats->total_time_spent);
-                    $this->entityManager->persist($newIssue);
-                    $updated++;
-                }
-            }
-        }
-
-        $this->entityManager->flush();
+        list($inserted, $updated) = $this->updateIssues($project, $gitlabProjectIssues);
 
         if($updated > 0) {
             $this->addFlash('success', "$updated issues have been updated.");
@@ -213,8 +173,7 @@ class DefaultController extends AbstractController
         $issues = $this->getDoctrine()->getRepository(Issue::class)->findTimedIssuesRelatedToProject($project);
 
         $html = $this->renderView('default/pdf_project_issues.html.twig', array(
-            'issues'  => $issues,
-            'projetc' => $project
+            'issues'  => $issues
         ));
 
         return new PdfResponse(
@@ -304,5 +263,56 @@ class DefaultController extends AbstractController
             }
         }
         $this->entityManager->flush();
+    }
+
+    /**
+     * @param Project $project
+     * @param array $gitlabProjectIssues
+     * @return array
+     * @throws Exception
+     */
+    private function updateIssues(Project $project, array $gitlabProjectIssues): array
+    {
+        $updated = 0;
+        $inserted = 0;
+        foreach ($gitlabProjectIssues as $issue) {
+            $newIssue = $this->entityManager->getRepository(Issue::class)
+                ->findOneBy(['gitlabId' => $issue->id]);
+
+            if ($newIssue == null) {
+                // We have to insert a new issue
+                $newIssue = new Issue();
+                $newIssue->setTitle($issue->title)
+                    ->setGitlabId($issue->id)
+                    ->setIssueNumber($issue->iid)
+                    ->setProject($project)
+                    ->setCreatedAt($this->gitlabTimeToW3CTime($issue->created_at))
+                    ->setUpdatedAt($this->gitlabTimeToW3CTime($issue->updated_at))
+                    ->setStatus($issue->state)
+                    ->setTimeEstimate($issue->time_stats->time_estimate)
+                    ->setTotalTimeSpent($issue->time_stats->total_time_spent);
+                $this->entityManager->persist($newIssue);
+                $inserted++;
+            } else {
+                /**
+                 * We have to test if the issue has been updated
+                 */
+                $lastUpdated = $this->gitlabTimeToW3CTime($issue->updated_at);
+                /**
+                 * @var $newIssue Issue
+                 */
+                if ($lastUpdated->getTimestamp() > $newIssue->getUpdatedAt()->getTimestamp()) {
+                    $newIssue->setStatus($issue->state)
+                        ->setUpdatedAt(new DateTime($issue->updated_at))
+                        ->setTimeEstimate($issue->time_stats->time_estimate)
+                        ->setTotalTimeSpent($issue->time_stats->total_time_spent);
+                    $this->entityManager->persist($newIssue);
+                    $updated++;
+                }
+            }
+        }
+
+        $this->entityManager->flush();
+        return array($inserted, $updated);
     }
 }
