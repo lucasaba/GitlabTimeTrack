@@ -13,7 +13,7 @@ Installation
 ALl the project is already configured to work with docker.
 First you'll have to check that docker and docker-compose are installed on your system.
 
-Then, you need to copy the `docker-compose.override.yml.dist` to `docker-compose.override.yml.dist` 
+Then, you need to copy the `docker-compose.override.yml.dist` to `docker-compose.override.yml` 
 and update its values:
 
 * GITLAB_TOKEN: 'YourGitlAbToKeN'
