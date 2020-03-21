@@ -29,15 +29,25 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
 
     public function onSetupMenu(SidebarMenuEvent $event)
     {
-        $menu = new MenuItemModel(
-            'update-projects-list-id',
-            'Update projects list',
-            'update_projects',
-            [],
-            'fas fa-sync'
+        $event->addItem(
+            new MenuItemModel(
+                'home-menu-id',
+                'Dashboard',
+                'home',
+                [],
+                'fas fa-tachometer-alt'
+            )
         );
 
-        $event->addItem($menu);
+        $event->addItem(
+            new MenuItemModel(
+                'update-projects-list-id',
+                'Update projects list',
+                'update_projects',
+                [],
+                'fas fa-sync'
+            )
+        );
 
         $projects = $this->entityManager->getRepository(Project::class)
             ->findBy([], ['name' => 'ASC']);
