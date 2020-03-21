@@ -95,7 +95,7 @@ class DefaultController extends AbstractController
         ));
 
         $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->handleProjectSelectionForm($projects, $form);
             return $this->redirectToRoute('home');
         }
@@ -150,11 +150,11 @@ class DefaultController extends AbstractController
 
         list($inserted, $updated) = $this->updateIssues($project, $gitlabProjectIssues);
 
-        if($updated > 0) {
+        if ($updated > 0) {
             $this->addFlash('success', "$updated issues have been updated.");
         }
 
-        if($inserted > 0) {
+        if ($inserted > 0) {
             $this->addFlash('success', "$inserted issues have been added.");
         }
 
@@ -215,9 +215,7 @@ class DefaultController extends AbstractController
                 'gitlabId' => $project->id,
                 'name' => $project->name,
                 'avatarUrl' => $project->avatar_url,
-                'associated' => $repository->findOneBy([
-                    'gitlabId' => $project->id] //We check if the project is already in our database
-                )
+                'associated' => $repository->findOneBy(['gitlabId' => $project->id]),
             ];
         }
 

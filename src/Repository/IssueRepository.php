@@ -47,7 +47,7 @@ class IssueRepository extends ServiceEntityRepository
             $result = $qry->getSingleScalarResult();
         } catch (NoResultException $e) {
             return 0;
-        }catch (NonUniqueResultException $e) {
+        } catch (NonUniqueResultException $e) {
             return 0;
         }
 
@@ -69,7 +69,7 @@ class IssueRepository extends ServiceEntityRepository
             $result = $qry->getSingleScalarResult();
         } catch (NoResultException $e) {
             return 0;
-        }catch (NonUniqueResultException $e) {
+        } catch (NonUniqueResultException $e) {
             return 0;
         }
 
@@ -89,9 +89,7 @@ class IssueRepository extends ServiceEntityRepository
 
         try {
             $result = $qry->getSingleScalarResult();
-        } catch (NoResultException $e) {
-            return 0;
-        }catch (NonUniqueResultException $e) {
+        } catch (NoResultException | NonUniqueResultException $e) {
             return 0;
         }
 

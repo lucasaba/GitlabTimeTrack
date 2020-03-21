@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-
 use App\Dto\GitlabResponseDto;
 use App\Entity\Project;
 use GuzzleHttp\Client;
@@ -50,7 +49,7 @@ class GitlabRequestService
     public function getProjects()
     {
         $cacheItem = $this->cache->getItem('gitlab.projects_lis');
-        if($cacheItem->isHit()) {
+        if ($cacheItem->isHit()) {
             $this->logger->debug('Reading projects list from cache');
             $projects = json_decode(
                 $cacheItem->get()
@@ -109,7 +108,7 @@ class GitlabRequestService
     public function clearProjectsCache(): void
     {
         $cacheItem = $this->cache->getItem('gitlab.projects_lis');
-        if($cacheItem->isHit()) {
+        if ($cacheItem->isHit()) {
             $this->logger->debug('Clearing projects cache');
             $this->cache->deleteItem('gitlab.projects_lis');
         }
