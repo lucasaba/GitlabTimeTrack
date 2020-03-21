@@ -6,6 +6,7 @@ namespace App\Service;
 use App\Dto\GitlabResponseDto;
 use App\Entity\Project;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -55,7 +56,7 @@ class GitlabRequestService
                 $cacheItem->get()
             );
         } else {
-            $projects = $this->getApiResult('/api/v4/projects');
+            $projects = $this->getApiResult('/apipopo/v4/projects');
             $this->logger->debug('Writing api result to cache');
             $cacheItem->set(json_encode($projects));
             $cacheItem->expiresAfter($this->cache_ttl);
@@ -65,12 +66,21 @@ class GitlabRequestService
         return $projects;
     }
 
-    public function getProjectsIssues(Project $project)
+    /**
+     * @param Project $project
+     * @return array
+     */
+    public function getProjectsIssues(Project $project): array
     {
         return $this->getApiResult('/api/v4/projects/'.$project->getGitlabId().'/issues');
     }
 
-    private function getApiResult($uri)
+    /**
+     * @param string $uri
+     * @return array
+     * @throws ClientException
+     */
+    private function getApiResult(string $uri): array
     {
         $nextPage = 1;
         $result = [];
