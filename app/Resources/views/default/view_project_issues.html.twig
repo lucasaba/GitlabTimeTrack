@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block page_subtitle %}
+    Project {{ project.name }} Issues
+{% endblock %}
+
+{% block page_content %}
+    {% set issuesCount = 0 %}
+    {% set issuesTotalTimeSpent = 0 %}
+    {% set issuesTimeEstimate = 0 %}
+    <h2 class="page-header">Issues for project {{ project.name }}</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Issues</h3>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    {% for issue in issues %}
+                        <p>
+                            Estimated: <span class="badge">{{ issue.timeEstimate|gitlab_time_format }}</span>
+                            Spent: <span class="badge">{{ issue.totalTimeSpent|gitlab_time_format }}</span>
+                        </p>
+                        <p>
+                            <i class="fa fa-check text-{% if issue.status == 'opened' %}gray{% else %}green{% endif %}"></i>
+                            <code>{{ issue.issueNumber }}</code>
+                            {{ issue.title }}
+                        </p>
+                        {% if issue.timeEstimate > 0 %}
+                            <div class="progress">
+                                {% set completition_percentage = (issue.totalTimeSpent/issue.timeEstimate)*100 %}
+                                <div class="progress-bar progress-bar-{% if issue.status=='closed' %}success{% else %}primary{% endif %} progress-bar-striped"
+                                     role="progressbar"
+                                     aria-valuenow="{{ issue.timeEstimate }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="{{ issue.totalTimeSpent }}"
+                                     style="width: {{ completition_percentage }}%">
+                                    <span class="sr-only">{{ completition_percentage }}% Complete (success)</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped" role="progressbar"
+                                     aria-valuenow="{{ issue.timeEstimate }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="{{ issue.timeEstimate }}"
+                                     style="width: 100%; background-color: #b9b9b9">
+                                    {#<span class="sr-only">{{ completition_percentage }}% Complete (success)</span>#}
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% set issuesCount = issuesCount+1 %}
+                        {% set issuesTotalTimeSpent = issuesTotalTimeSpent + issue.totalTimeSpent %}
+                        {% set issuesTimeEstimate = issuesTimeEstimate + issue.timeEstimate %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Stats</h3>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul>
+                        <li>Total issues: {{ issuesCount }}</li>
+                        <li>Total estimated time: {{ issuesTimeEstimate|gitlab_time_format }}</li>
+                        <li>Total time spent: {{ issuesTotalTimeSpent|gitlab_time_format }}</li>
+                    </ul>
+                    <a href="{{ path('update_projects_issues', {'id': project.id}) }}" class="btn btn-primary">
+                        <i class="fa fa-refresh"></i>
+                        Update
+                    </a>{% if executable %}
+                    <a href="{{ path('export_project_to_pdf', {'id': project.id}) }}" class="btn btn-primary">
+                        <i class="fa fa-file-pdf-o"></i>
+                        Export to PDF
+                    </a>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
