@@ -56,7 +56,7 @@ class GitlabRequestService
                 $cacheItem->get()
             );
         } else {
-            $projects = $this->getApiResult('/apipopo/v4/projects');
+            $projects = $this->getApiResult('/api/v4/projects');
             $this->logger->debug('Writing api result to cache');
             $cacheItem->set(json_encode($projects));
             $cacheItem->expiresAfter($this->cache_ttl);
