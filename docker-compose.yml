@@ -7,6 +7,12 @@ services:
   php-cli:
     build:
       context: .docker/php-cli
+    environment:
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_NAME: gitlab-time-track
+      DB_USER: app
+      DB_PASSWORD: password
     tty: true
     volumes:
       - ./:/var/www
@@ -29,15 +35,13 @@ services:
     build:
       context: .docker/php-fpm
     environment:
-      DB_HOST: mysql
+      DB_HOST: mariadb
       DB_PORT: 3306
       DB_NAME: gitlab-time-track
       DB_USER: app
       DB_PASSWORD: password
-      SYMFONY_ENV: prod
-      SECRET_KEY: o7AMrPAaF7yfrfstkTmdhCrtjoTjeTtd
       GITLAB_TOKEN: EnterYourSecretTokenHere
-      GITLAB_SERVER_URL: https://gitlab.com/api/v4
+      GITLAB_SERVER_URL: 'https://gitlab.com'
     volumes:
       - ./:/var/www
     networks:

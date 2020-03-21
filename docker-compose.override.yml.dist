@@ -1,55 +1,15 @@
 version: '3.6'
 
-networks:
-  web-network:
-
 services:
-  php-cli:
-    build:
-      context: .docker/php-cli
-    tty: true
-    volumes:
-      - ./:/var/www
-    networks:
-      - web-network
-
-  nginx:
-    build:
-      context: .docker/nginx
-    ports:
-      - "8080:80"
-    tty: true
-    volumes:
-      - ./:/var/www
-      - .docker/nginx/conf.d:/etc/nginx/conf.d
-    networks:
-      - web-network
-
   php-fpm:
-    build:
-      context: .docker/php-fpm
     environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: gitlab-time-track
-      DB_USER: app
-      DB_PASSWORD: password
       GITLAB_TOKEN: EnterYourSecretTokenHere
-      GITLAB_SERVER_URL: https://gitlab.com/api/v4
-    volumes:
-      - ./:/var/www
-    networks:
-      - web-network
-
-  mariadb:
-    build:
-      context: .docker/mysql
+      GITLAB_SERVER_URL: 'https://gitlab.com'
+      WKHTMLTOPDF_PATH: '/usr/bin/wkhtmltopdf'
+      WKHTMLTOIMAGE_PATH: '/usr/bin/wkhtmltoimage'
+  php-fpm:
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: gitlab-time-track
-      MYSQL_USER: app
-      MYSQL_PASSWORD: password
-    ports:
-      - 33306:3306
-    networks:
-      - web-network
+      GITLAB_TOKEN: EnterYourSecretTokenHere
+      GITLAB_SERVER_URL: 'https://gitlab.com'
+      WKHTMLTOPDF_PATH: '/usr/bin/wkhtmltopdf'
+      WKHTMLTOIMAGE_PATH: '/usr/bin/wkhtmltoimage'

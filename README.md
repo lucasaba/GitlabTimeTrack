@@ -1,12 +1,14 @@
-Gitlab Timetrack
-================
+Gitlab TimeTrack 2
+==================
 
 A Symfony project to display time track info from Gitlab Projects
 
+Version 2 upgrades symfony and Docker environment
+
 ![Gitlab TimeTrack screenshot](src/AppBundle/Resources/images/screenshot.png)
 
-Docker
-------
+Docker installation
+-------------------
 
 To run the project via docker-compose, make sure you have docker and
 docker-compose installed on your system.
@@ -18,48 +20,34 @@ docker-compose installed on your system.
 To spin up the containers, just run:
 
 ```bash
-docker-compose up
+docker-compose up -d
 ```
 
-Installation
-------------
+Dependencies installation and DB setup on docker
+------------------------------------------------
 
-Install from packagist (still in development stage)
+The first time, you'll need to install dependencies. For this, I've made available some `make` command:
 
-`composer.phar create-project lucasaba/gitlab-time-track.git -s dev`
+```bash
+make install
+``` 
 
-You'll have to provide some information:
+The script will install dependencies and initialize the DB
 
-* database_host (127.0.0.1):
-* database_port (null):
-* database_name (symfony):
-* database_user (root):
-* database_password (null):
-* secret (ThisTokenIsNotSoSecretChangeIt):
+You'll have to provide some information. The default value should be good.
+
+You'll have to provide the gitlab token and server url. The gitlab token can be obtained at
+`https://your.gitlab.server.host/profile/personal_access_tokens`
+
 * gitlab_token (yourSuperSecretGitlabToken):
 * gitlab_server_url ('https://your.gitlab.server.host/api/v4'):
 
-The gitlab token can be obteined in `https://your.gitlab.server.host/profile/personal_access_tokens`
+On docker, you need to copy the `docker-compose.override.yml.dist` to
+`docker-compose.override.yml.dist` and update its values:
 
-Enter in the project folder
-```bash
-cd gitlab-time-track.git
-```
-Create the database and the schema
+* GITLAB_TOKEN: 'YourGitlAbToKeN'
+* GITLAB_SERVER_URL: 'https://gitlab.com' 
 
-```bash
-user@server:/path/to/gitlab-timetrack-project$ php bin/console doctrine:database:create
-user@server:/path/to/gitlab-timetrack-project$ php bin/console doctrine:schema:create
-
-```
-
-If you don't want to configure your personal web server, just start the php web server:
-
-```bash
-user@server:/path/to/gitlab-timetrack-project$ php bin/console server:start
-
-```
-
-Head to [http://localhost:8000](http://localhost:8000)
+Head to [http://localhost:8080](http://localhost:8080)
 
 That's all!
