@@ -16,10 +16,10 @@ class AppExtension extends AbstractExtension
     /**
      * Filter for formatting times as in GitLab
      * e.g. 1d 15h 30m  or  1h 10m
-     * @param $number
+     * @param int|null $number
      * @return string
      */
-    public function gitlabTimeFormatFilter($number)
+    public function gitlabTimeFormatFilter(int $number = null): string
     {
         if($number == null) {
             return 0;
