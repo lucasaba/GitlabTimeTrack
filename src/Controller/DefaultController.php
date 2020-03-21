@@ -49,8 +49,9 @@ class DefaultController extends AbstractController
 
     /**
      * @Route("/", name="home")
+     * @return Response
      */
-    public function index()
+    public function index(): Response
     {
         $numberOfProjects = $this->entityManager->getRepository(Project::class)->countProjects();
         $numberOfIssues = $this->entityManager->getRepository(Issue::class)->countIssues();

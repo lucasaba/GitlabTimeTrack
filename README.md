@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lucasaba/GitlabTimeTrack.svg?branch=master)](https://travis-ci.org/lucasaba/GitlabTimeTrack)
+
 Gitlab TimeTrack 2
 ==================
 

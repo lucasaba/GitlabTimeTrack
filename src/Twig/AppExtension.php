@@ -21,11 +21,11 @@ class AppExtension extends AbstractExtension
      */
     public function gitlabTimeFormatFilter(int $number = null): string
     {
-        if ($number == null) {
-            return 0;
+        if($number == null) {
+            return '0';
         }
         $output = '';
-        $days = floor($number/(60*60*24));
+        $days = (int) floor($number/(60*60*24));
         if ($days > 0) {
             $output .= $days . 'd ';
         }

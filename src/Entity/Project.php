@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -16,31 +15,37 @@ class Project
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @var int
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @var string
      */
     private $name;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Issue", mappedBy="project")
+     * @var ArrayCollection<Issue>
      */
     private $issues;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @var string|null
      */
     private $namespace;
 
     /**
      * @ORM\Column(name="gitlab_id", type="integer", unique=true)
+     * @var int
      */
     private $gitlabId;
 
     /**
      * @ORM\Column(name="avatar_url", type="string", length=255, nullable=true)
+     * @var string|null
      */
     private $avatarUrl;
 
@@ -54,7 +59,7 @@ class Project
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -67,9 +72,9 @@ class Project
     }
 
     /**
-     * @return Collection|Issue[]
+     * @return ArrayCollection<Issue>
      */
-    public function getIssues(): Collection
+    public function getIssues()
     {
         return $this->issues;
     }

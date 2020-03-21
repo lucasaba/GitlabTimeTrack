@@ -68,6 +68,9 @@ class GitlabResponseDto
         $this->totalPages = $this->getSingleHeader($response->getHeader('X-Total-Pages'));
     }
 
+    /**
+     * @return array|mixed
+     */
     public function getArrayContent()
     {
         $content = $this->response->getBody();
@@ -101,10 +104,10 @@ class GitlabResponseDto
      * @return int The value of the header
      *
      */
-    private function getSingleHeader($values)
+    private function getSingleHeader($values): int
     {
         if (count($values) > 0) {
-            return $values[0];
+            return intval($values[0]);
         }
 
         return 0;

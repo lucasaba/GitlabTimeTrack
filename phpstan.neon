@@ -7,3 +7,7 @@ parameters:
     excludes_analyse:
         - %currentWorkingDirectory%/vendor/*
         - %currentWorkingDirectory%/tests/*
+    checkMissingIterableValueType: false
+    ignoreErrors:
+        - '#InvalidArgumentException is not subtype of Throwable#'
+        - '#activateByRoute() expects array<KevinPapst\\AdminLTEBundle\\Model\\MenuItemModel>, array<KevinPapst\\AdminLTEBundle\\Model\\MenuItemInterface|Knp\\Menu\\MenuItem> given#'

@@ -22,6 +22,10 @@ class IssueRepository extends ServiceEntityRepository
         parent::__construct($registry, Issue::class);
     }
 
+    /**
+     * @param Project $project
+     * @return mixed
+     */
     public function findTimedIssuesRelatedToProject(Project $project)
     {
         return $this->getEntityManager()->createQuery(
