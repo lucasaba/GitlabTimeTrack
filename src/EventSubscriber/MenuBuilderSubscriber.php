@@ -76,7 +76,7 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
         if (null !== $request) {
             $this->activateByRoute(
-                $$request->get('_route'),
+                $request->get('_route'),
                 $event->getItems()
             );
         }
