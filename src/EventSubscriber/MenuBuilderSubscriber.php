@@ -80,7 +80,6 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
                 $event->getItems()
             );
         }
-
     }
 
     /**

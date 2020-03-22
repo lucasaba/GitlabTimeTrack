@@ -188,11 +188,11 @@ class DefaultController extends AbstractController
      * gitlab is much more precise then MySql
      *
      *
-     * @param $gitlabTime string
+     * @param string $gitlabTime
      * @return DateTime
      * @throws Exception
      */
-    private function gitlabTimeToW3CTime($gitlabTime)
+    private function gitlabTimeToW3CTime(string $gitlabTime): DateTime
     {
         /**
          * Gitlab uses RFC3339_EXTENDED date format
@@ -292,15 +292,16 @@ class DefaultController extends AbstractController
                     ->setTotalTimeSpent($issue->time_stats->total_time_spent);
                 $this->entityManager->persist($newIssue);
                 $inserted++;
-            } else {
+            } elseif ($newIssue instanceof Issue) {
                 /**
                  * We have to test if the issue has been updated
                  */
                 $lastUpdated = $this->gitlabTimeToW3CTime($issue->updated_at);
                 /**
-                 * @var $newIssue Issue
+                 * @var Issue $newIssue
                  */
-                if ($lastUpdated->getTimestamp() > $newIssue->getUpdatedAt()->getTimestamp()) {
+                $updatedAt = $newIssue->getUpdatedAt();
+                if ($updatedAt && $lastUpdated->getTimestamp() > $updatedAt->getTimestamp()) {
                     $newIssue->setStatus($issue->state)
                         ->setUpdatedAt(new DateTime($issue->updated_at))
                         ->setTimeEstimate($issue->time_stats->time_estimate)

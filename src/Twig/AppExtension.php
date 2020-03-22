@@ -21,7 +21,7 @@ class AppExtension extends AbstractExtension
      */
     public function gitlabTimeFormatFilter(int $number = null): string
     {
-        if($number == null) {
+        if ($number == null) {
             return '0';
         }
         $output = '';

@@ -8,6 +8,12 @@ parameters:
         - %currentWorkingDirectory%/vendor/*
         - %currentWorkingDirectory%/tests/*
     checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
     ignoreErrors:
         - '#InvalidArgumentException is not subtype of Throwable#'
         - '#activateByRoute() expects array<KevinPapst\\AdminLTEBundle\\Model\\MenuItemModel>, array<KevinPapst\\AdminLTEBundle\\Model\\MenuItemInterface|Knp\\Menu\\MenuItem> given#'
+        - '#Call to an undefined method Doctrine\\Persistence\\ObjectRepository::countProjects().#'
+        - '#Call to an undefined method Doctrine\\Persistence\\ObjectRepository::countTimeSpent().#'
+        - '#Call to an undefined method Doctrine\\Persistence\\ObjectRepository::countIssues().#'
+        - '#Call to an undefined method Doctrine\\Persistence\\ObjectRepository::findTimedIssuesRelatedToProject().#'
+        - '#Call to an undefined method Doctrine\\Persistence\\ObjectRepository::countEstimatedTime().#'
