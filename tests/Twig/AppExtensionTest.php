@@ -4,9 +4,19 @@ namespace App\Tests\Twig;
 
 use App\Twig\AppExtension;
 use PHPUnit\Framework\TestCase;
+use Twig\TwigFilter;
 
 class AppExtensionTest extends TestCase
 {
+    public function testGetFilters()
+    {
+        $filters = (new AppExtension())->getFilters();
+        $this->assertEquals(1, count($filters));
+        $timeFormatFilter = $filters[0];
+        $this->assertTrue($timeFormatFilter instanceof TwigFilter);
+        $this->assertEquals('gitlab_time_format', $timeFormatFilter->getName());
+    }
+
     /**
      * @dataProvider getTestData
      * @param $timeInSeconds

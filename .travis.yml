@@ -7,8 +7,9 @@ install:
 
 script:
   - vendor/bin/phpstan analyse
-  - vendor/bin/phpunit
   - vendor/bin/phpcs
+  - vendor/bin/phpunit
+
 
 after_success:
   - travis_retry php vendor/bin/php-coveralls

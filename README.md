@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/lucasaba/GitlabTimeTrack.svg?branch=master)](https://travis-ci.org/lucasaba/GitlabTimeTrack)
+[![Coverage Status](https://coveralls.io/repos/github/lucasaba/GitlabTimeTrack/badge.svg?branch=master)](https://coveralls.io/github/lucasaba/GitlabTimeTrack?branch=master)
 
 Gitlab TimeTrack 2
 ==================

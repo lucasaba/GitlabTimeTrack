@@ -60,6 +60,8 @@ quickstart:
 	@echo " ${green}${bold}docker-start${normal}: Starts docker containers."
 	@echo " ${green}${bold}docker-stop${normal}: Stop docker containers."
 	@echo " ${green}${bold}docker-restart${normal}: Re-starts docker containers."
+	@echo " ${green}${bold}all-tests${normal}: Performs phpunit, php-cs and phpstan test."
+	@echo " ${green}${bold}fix-cs${normal}: Corrects Code Style errors."
 	@echo ""
 
 shell:
@@ -81,3 +83,11 @@ docker-stop:
 docker-restart:
 	@docker-compose stop
 	@docker-compose up -d
+
+all-tests:
+	@docker-compose exec -w "/var/www" $(PHP) vendor/bin/phpstan analyse
+	@docker-compose exec -w "/var/www" $(PHP) vendor/bin/phpcs
+	@docker-compose exec -w "/var/www" $(PHP) vendor/bin/phpunit
+
+fix-cs:
+	@docker-compose exec -w "/var/www" $(PHP) vendor/bin/phpcbf
