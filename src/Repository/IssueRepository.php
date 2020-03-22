@@ -22,6 +22,10 @@ class IssueRepository extends ServiceEntityRepository
         parent::__construct($registry, Issue::class);
     }
 
+    /**
+     * @param Project $project
+     * @return mixed
+     */
     public function findTimedIssuesRelatedToProject(Project $project)
     {
         return $this->getEntityManager()->createQuery(
@@ -47,7 +51,7 @@ class IssueRepository extends ServiceEntityRepository
             $result = $qry->getSingleScalarResult();
         } catch (NoResultException $e) {
             return 0;
-        }catch (NonUniqueResultException $e) {
+        } catch (NonUniqueResultException $e) {
             return 0;
         }
 
@@ -69,7 +73,7 @@ class IssueRepository extends ServiceEntityRepository
             $result = $qry->getSingleScalarResult();
         } catch (NoResultException $e) {
             return 0;
-        }catch (NonUniqueResultException $e) {
+        } catch (NonUniqueResultException $e) {
             return 0;
         }
 
@@ -89,9 +93,7 @@ class IssueRepository extends ServiceEntityRepository
 
         try {
             $result = $qry->getSingleScalarResult();
-        } catch (NoResultException $e) {
-            return 0;
-        }catch (NonUniqueResultException $e) {
+        } catch (NoResultException | NonUniqueResultException $e) {
             return 0;
         }
 

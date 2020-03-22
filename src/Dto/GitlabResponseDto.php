@@ -17,13 +17,43 @@
 
 namespace App\Dto;
 
-
 use Psr\Http\Message\ResponseInterface;
 
 class GitlabResponseDto
 {
-    private $pageNumber, $nextPage, $prevPage, $perPage, $totalObjects, $totalPages;
+    /**
+     * @var int
+     */
+    private $pageNumber;
 
+    /**
+     * @var int
+     */
+    private $nextPage;
+
+    /**
+     * @var int
+     */
+    private $prevPage;
+
+    /**
+     * @var int
+     */
+    private $perPage;
+
+    /**
+     * @var int
+     */
+    private $totalObjects;
+
+    /**
+     * @var int
+     */
+    private $totalPages;
+
+    /**
+     * @var ResponseInterface
+     */
     private $response;
 
     public function __construct(ResponseInterface $response)
@@ -38,11 +68,14 @@ class GitlabResponseDto
         $this->totalPages = $this->getSingleHeader($response->getHeader('X-Total-Pages'));
     }
 
+    /**
+     * @return array|mixed
+     */
     public function getArrayContent()
     {
         $content = $this->response->getBody();
         $res = json_decode($content);
-        if($res == null) {
+        if ($res == null) {
             return [];
         }
         return $res;
@@ -54,7 +87,7 @@ class GitlabResponseDto
      */
     public function hasNext()
     {
-        if($this->pageNumber < $this->totalPages) {
+        if ($this->pageNumber < $this->totalPages) {
             return $this->nextPage;
         }
 
@@ -71,10 +104,10 @@ class GitlabResponseDto
      * @return int The value of the header
      *
      */
-    private function getSingleHeader($values)
+    private function getSingleHeader($values): int
     {
-        if(count($values) > 0) {
-            return $values[0];
+        if (count($values) > 0) {
+            return intval($values[0]);
         }
 
         return 0;

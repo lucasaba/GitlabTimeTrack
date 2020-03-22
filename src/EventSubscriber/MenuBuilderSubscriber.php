@@ -27,7 +27,10 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
         ];
     }
 
-    public function onSetupMenu(SidebarMenuEvent $event)
+    /**
+     * @param SidebarMenuEvent $event
+     */
+    public function onSetupMenu(SidebarMenuEvent $event): void
     {
         $event->addItem(
             new MenuItemModel(
@@ -53,6 +56,9 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
             ->findBy([], ['name' => 'ASC']);
 
         foreach ($projects as $project) {
+            if (! $project instanceof Project) {
+                continue;
+            }
             /**
              * @var $project Project
              */
@@ -67,17 +73,20 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
             );
         }
 
-        $this->activateByRoute(
-            $event->getRequest()->get('_route'),
-            $event->getItems()
-        );
+        $request = $event->getRequest();
+        if (null !== $request) {
+            $this->activateByRoute(
+                $$request->get('_route'),
+                $event->getItems()
+            );
+        }
     }
 
     /**
      * @param string $route
      * @param MenuItemModel[] $items
      */
-    protected function activateByRoute($route, $items)
+    protected function activateByRoute($route, $items): void
     {
         foreach ($items as $item) {
             if ($item->hasChildren()) {

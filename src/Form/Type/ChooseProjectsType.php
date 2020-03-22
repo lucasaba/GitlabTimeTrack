@@ -9,7 +9,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ChooseProjectsType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    /**
+     * @param FormBuilderInterface $builder
+     * @param array $options
+     */
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         foreach ($options['gitlabProjects'] as $project) {
             $builder->add('project_'.$project['gitlabId'], CheckboxType::class, array(
@@ -21,12 +25,18 @@ class ChooseProjectsType extends AbstractType
         }
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    /**
+     * @param OptionsResolver $resolver
+     */
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setRequired('gitlabProjects');
     }
 
-    public function getBlockPrefix()
+    /**
+     * @return string
+     */
+    public function getBlockPrefix(): string
     {
         return 'app_choose_projects_type';
     }

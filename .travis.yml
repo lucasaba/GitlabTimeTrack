@@ -1,0 +1,15 @@
+language: php
+php:
+  - '7.2'
+
+install:
+  - composer install --dev --no-interaction --no-scripts
+
+script:
+  - vendor/bin/phpstan analyse
+  - vendor/bin/phpcs
+  - vendor/bin/phpunit
+
+
+after_success:
+  - travis_retry php vendor/bin/php-coveralls

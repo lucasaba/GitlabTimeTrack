@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -14,51 +15,61 @@ class Issue
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @var int
      */
     private $id;
 
     /**
      * @ORM\Column(type="integer")
+     * @var int
      */
     private $gitlabId;
 
     /**
      * @ORM\Column(type="integer")
+     * @var int
      */
     private $issueNumber;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Project", inversedBy="issues")
+     * @var Project|null
      */
     private $project;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @var string
      */
     private $title;
 
     /**
      * @ORM\Column(type="integer")
+     * @var int
      */
     private $timeEstimate;
 
     /**
      * @ORM\Column(type="integer")
+     * @var int
      */
     private $totalTimeSpent;
 
     /**
      * @ORM\Column(type="datetime")
+     * @var DateTimeInterface
      */
     private $createdAt;
 
     /**
      * @ORM\Column(type="datetime")
+     * @var DateTimeInterface
      */
     private $updatedAt;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @var string
      */
     private $status;
 
@@ -139,24 +150,24 @@ class Issue
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
+    public function setUpdatedAt(DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
 

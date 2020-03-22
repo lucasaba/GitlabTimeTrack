@@ -2,6 +2,8 @@
 /.idea
 *~
 /docker-compose.override.yml
+/build
+!/build/.gitkeep
 ###< Local development ###
 
 ###> symfony/framework-bundle ###
@@ -13,9 +15,12 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+###> squizlabs/php_codesniffer ###
+/.phpcs-cache
+/phpcs.xml
+###< squizlabs/php_codesniffer ###
 
-###> symfony/phpunit-bridge ###
-.phpunit
-.phpunit.result.cache
+###> phpunit/phpunit ###
 /phpunit.xml
-###< symfony/phpunit-bridge ###
+.phpunit.result.cache
+###< phpunit/phpunit ###

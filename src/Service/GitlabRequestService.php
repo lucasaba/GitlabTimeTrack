@@ -2,24 +2,27 @@
 
 namespace App\Service;
 
-
 use App\Dto\GitlabResponseDto;
 use App\Entity\Project;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\HttpFoundation\Request;
 
 class GitlabRequestService
 {
+    public const CACHE_KEY = 'gitlab.projects_list';
+
     /**
      * @var Client
      */
     private $client;
 
     /**
-     * @var FilesystemAdapter
+     * @var AdapterInterface
      */
     private $cache;
 
@@ -33,10 +36,19 @@ class GitlabRequestService
      */
     private $logger;
 
-    public function __construct(Client $client, LoggerInterface $logger, int $cache_ttl = 3600)
-    {
+    public function __construct(
+        Client $client,
+        LoggerInterface $logger,
+        int $cache_ttl = 3600,
+        AdapterInterface $cache = null
+    ) {
         $this->client = $client;
-        $this->cache = new FilesystemAdapter();
+        if (null === $cache) {
+            $this->cache = new FilesystemAdapter();
+        } else {
+            $this->cache = $cache;
+        }
+
         $this->logger = $logger;
         $this->cache_ttl = $cache_ttl;
     }
@@ -49,8 +61,8 @@ class GitlabRequestService
      */
     public function getProjects()
     {
-        $cacheItem = $this->cache->getItem('gitlab.projects_lis');
-        if($cacheItem->isHit()) {
+        $cacheItem = $this->cache->getItem(self::CACHE_KEY);
+        if ($cacheItem->isHit()) {
             $this->logger->debug('Reading projects list from cache');
             $projects = json_decode(
                 $cacheItem->get()
@@ -86,12 +98,16 @@ class GitlabRequestService
         $result = [];
         while ($nextPage > 0) {
             $this->logger->debug("Requesting page $nextPage from gitlab server");
-            $response = new GitlabResponseDto($this->client->get($uri, [
-                'query' => [
-                    'page' => $nextPage,
-                    'per_page' => 100, // We use the max per page result as possible
+            $response = new GitlabResponseDto($this->client->request(
+                Request::METHOD_GET,
+                $uri,
+                [
+                    'query' => [
+                        'page' => $nextPage,
+                        'per_page' => 100, // We use the max per page result as possible
+                    ]
                 ]
-            ]));
+            ));
 
             foreach ($response->getArrayContent() as $item) {
                 $result[] = $item;
@@ -108,10 +124,10 @@ class GitlabRequestService
      */
     public function clearProjectsCache(): void
     {
-        $cacheItem = $this->cache->getItem('gitlab.projects_lis');
-        if($cacheItem->isHit()) {
+        $cacheItem = $this->cache->getItem(self::CACHE_KEY);
+        if ($cacheItem->isHit()) {
             $this->logger->debug('Clearing projects cache');
-            $this->cache->deleteItem('gitlab.projects_lis');
+            $this->cache->deleteItem(self::CACHE_KEY);
         }
     }
 }

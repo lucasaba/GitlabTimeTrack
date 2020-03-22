@@ -49,8 +49,9 @@ class DefaultController extends AbstractController
 
     /**
      * @Route("/", name="home")
+     * @return Response
      */
-    public function index()
+    public function index(): Response
     {
         $numberOfProjects = $this->entityManager->getRepository(Project::class)->countProjects();
         $numberOfIssues = $this->entityManager->getRepository(Issue::class)->countIssues();
@@ -95,7 +96,7 @@ class DefaultController extends AbstractController
         ));
 
         $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->handleProjectSelectionForm($projects, $form);
             return $this->redirectToRoute('home');
         }
@@ -150,11 +151,11 @@ class DefaultController extends AbstractController
 
         list($inserted, $updated) = $this->updateIssues($project, $gitlabProjectIssues);
 
-        if($updated > 0) {
+        if ($updated > 0) {
             $this->addFlash('success', "$updated issues have been updated.");
         }
 
-        if($inserted > 0) {
+        if ($inserted > 0) {
             $this->addFlash('success', "$inserted issues have been added.");
         }
 
@@ -187,11 +188,11 @@ class DefaultController extends AbstractController
      * gitlab is much more precise then MySql
      *
      *
-     * @param $gitlabTime string
+     * @param string $gitlabTime
      * @return DateTime
      * @throws Exception
      */
-    private function gitlabTimeToW3CTime($gitlabTime)
+    private function gitlabTimeToW3CTime(string $gitlabTime): DateTime
     {
         /**
          * Gitlab uses RFC3339_EXTENDED date format
@@ -215,9 +216,7 @@ class DefaultController extends AbstractController
                 'gitlabId' => $project->id,
                 'name' => $project->name,
                 'avatarUrl' => $project->avatar_url,
-                'associated' => $repository->findOneBy([
-                    'gitlabId' => $project->id] //We check if the project is already in our database
-                )
+                'associated' => $repository->findOneBy(['gitlabId' => $project->id]),
             ];
         }
 
@@ -293,15 +292,16 @@ class DefaultController extends AbstractController
                     ->setTotalTimeSpent($issue->time_stats->total_time_spent);
                 $this->entityManager->persist($newIssue);
                 $inserted++;
-            } else {
+            } elseif ($newIssue instanceof Issue) {
                 /**
                  * We have to test if the issue has been updated
                  */
                 $lastUpdated = $this->gitlabTimeToW3CTime($issue->updated_at);
                 /**
-                 * @var $newIssue Issue
+                 * @var Issue $newIssue
                  */
-                if ($lastUpdated->getTimestamp() > $newIssue->getUpdatedAt()->getTimestamp()) {
+                $updatedAt = $newIssue->getUpdatedAt();
+                if ($updatedAt && $lastUpdated->getTimestamp() > $updatedAt->getTimestamp()) {
                     $newIssue->setStatus($issue->state)
                         ->setUpdatedAt(new DateTime($issue->updated_at))
                         ->setTimeEstimate($issue->time_stats->time_estimate)

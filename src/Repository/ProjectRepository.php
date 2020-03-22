@@ -36,7 +36,7 @@ class ProjectRepository extends ServiceEntityRepository
             $result = $qry->getSingleScalarResult();
         } catch (NoResultException $e) {
             return 0;
-        }catch (NonUniqueResultException $e) {
+        } catch (NonUniqueResultException $e) {
             return 0;
         }
 
