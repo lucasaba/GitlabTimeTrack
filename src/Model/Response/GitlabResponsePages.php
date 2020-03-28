@@ -1,25 +1,10 @@
 <?php
-/**
- * Questo file fa parte del progetto gitlab-timetrack.
- * Il codice è fornito senza alcuna garanzia e distribuito
- * con licenza di tipo open source.
- * Per le informazioni sui diritti e le informazioni sulla licenza
- * consultare il file LICENSE che deve essere distribuito
- * insieme a questo codice.
- *
- * (c) Luca Saba <lucasaba@gmail.com>
- *
- * Created by PhpStorm.
- * User: luca
- * Date: 10/11/17
- * Time: 9.28
- */
 
-namespace App\Dto;
+namespace App\Model\Response;
 
 use Psr\Http\Message\ResponseInterface;
 
-class GitlabResponseDto
+class GitlabResponsePages
 {
     /**
      * @var int
@@ -56,7 +41,7 @@ class GitlabResponseDto
      */
     private $response;
 
-    public function __construct(ResponseInterface $response)
+    private function __construct(ResponseInterface $response)
     {
         $this->response = $response;
 
@@ -66,19 +51,6 @@ class GitlabResponseDto
         $this->perPage = $this->getSingleHeader($response->getHeader('X-Per-Page'));
         $this->totalObjects = $this->getSingleHeader($response->getHeader('X-Total'));
         $this->totalPages = $this->getSingleHeader($response->getHeader('X-Total-Pages'));
-    }
-
-    /**
-     * @return array|mixed
-     */
-    public function getArrayContent()
-    {
-        $content = $this->response->getBody();
-        $res = json_decode($content);
-        if ($res == null) {
-            return [];
-        }
-        return $res;
     }
 
     /**

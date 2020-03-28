@@ -5,6 +5,7 @@ eight_points_guzzle:
     logging: true
     clients:
         api_gitlab:
+            class: App\Client\GitlabApiClient
             base_url: '%env(string:GITLAB_SERVER_URL)%'
             options:
                 headers:

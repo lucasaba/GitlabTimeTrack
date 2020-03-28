@@ -2,10 +2,9 @@
 
 namespace App\Tests\Service;
 
+use App\Client\GitlabApiClient;
 use App\Entity\Project;
 use App\Service\GitlabRequestService;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +16,7 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 class GitlabRequestServiceTest extends TestCase
 {
     /**
-     * @var Client|MockObject
+     * @var GitlabApiClient|MockObject
      */
     protected $client;
 
@@ -33,7 +32,7 @@ class GitlabRequestServiceTest extends TestCase
 
     public function setUp(): void
     {
-        $this->client = $this->createMock(Client::class);
+        $this->client = $this->createMock(GitlabApiClient::class);
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->cache = $this->createMock(FilesystemAdapter::class);
     }

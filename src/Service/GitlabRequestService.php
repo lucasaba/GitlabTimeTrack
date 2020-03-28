@@ -2,10 +2,15 @@
 
 namespace App\Service;
 
+use App\Client\GitlabApiClient;
 use App\Dto\GitlabResponseDto;
 use App\Entity\Project;
-use GuzzleHttp\Client;
+use App\Model\Issue;
+use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Exception\ClientException;
+use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerBuilder;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
@@ -16,8 +21,10 @@ class GitlabRequestService
 {
     public const CACHE_KEY = 'gitlab.projects_list';
 
+    protected const GITLAB_API_BASE_PATH = '/api/v4/projects';
+
     /**
-     * @var Client
+     * @var GitlabApiClient
      */
     private $client;
 
@@ -37,7 +44,7 @@ class GitlabRequestService
     private $logger;
 
     public function __construct(
-        Client $client,
+        GitlabApiClient $client,
         LoggerInterface $logger,
         int $cache_ttl = 3600,
         AdapterInterface $cache = null
@@ -68,7 +75,7 @@ class GitlabRequestService
                 $cacheItem->get()
             );
         } else {
-            $projects = $this->getApiResult('/api/v4/projects');
+            $projects = $this->getApiResult(self::GITLAB_API_BASE_PATH);
             $this->logger->debug('Writing api result to cache');
             $cacheItem->set(json_encode($projects));
             $cacheItem->expiresAfter($this->cache_ttl);
@@ -84,21 +91,13 @@ class GitlabRequestService
      */
     public function getProjectsIssues(Project $project): array
     {
-        return $this->getApiResult('/api/v4/projects/'.$project->getGitlabId().'/issues');
-    }
-
-    /**
-     * @param string $uri
-     * @return array
-     * @throws ClientException
-     */
-    private function getApiResult(string $uri): array
-    {
+        $apiPath = sprintf('%s/%s/issues', self::GITLAB_API_BASE_PATH, $project->getGitlabId());
         $nextPage = 1;
-        $result = [];
+        $result = new ArrayCollection();
+        $serializer = SerializerBuilder::create()->build();
         while ($nextPage > 0) {
-            $this->logger->debug("Requesting page $nextPage from gitlab server");
-            $response = new GitlabResponseDto($this->client->request(
+            $this->logger->debug("Requesting issues page $nextPage from gitlab server");
+            $response = new GitlabResponseP($this->client->request(
                 Request::METHOD_GET,
                 $uri,
                 [
@@ -108,10 +107,31 @@ class GitlabRequestService
                     ]
                 ]
             ));
+        }
+        return $this->getApiResult($apiPath);
+    }
 
-            foreach ($response->getArrayContent() as $item) {
-                $result[] = $item;
-            }
+    /**
+     * @param string $uri
+     * @return ArrayCollection
+     * @throws ClientException
+     */
+    private function getApiResult(string $uri): ArrayCollection
+    {
+        $nextPage = 1;
+        $result = new ArrayCollection();
+        $serializer = SerializerBuilder::create()->build();
+        while ($nextPage > 0) {
+            $this->logger->debug("Requesting page $nextPage from gitlab server");
+
+
+            $issues = $serializer->deserialize(
+                $response->getBody(),
+                'array<App\Model\Issue>',
+                'json'
+            );
+
+            $result->add($issues);
 
             $nextPage = $response->hasNext();
         }
