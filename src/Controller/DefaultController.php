@@ -84,7 +84,7 @@ class DefaultController extends AbstractController
          * We need to fetch all projects from our GitLab server
          */
         try {
-            $gitlabProjects = $this->gitlabRequestService->getProjects();
+            $gitlabProjects = $this->gitlabRequestService->getProjects($request->get('visibility'));
         } catch (InvalidArgumentException | ClientException $e) {
             $this->addFlash('warning', 'An exception has been thrown: ' . $e->getMessage());
             return $this->redirectToRoute('home');
@@ -112,11 +112,11 @@ class DefaultController extends AbstractController
      * @return Response
      * @throws InvalidArgumentException
      */
-    public function clearProjectsCacheAction()
+    public function clearProjectsCacheAction(Request $request)
     {
         $this->gitlabRequestService->clearProjectsCache();
 
-        return $this->redirectToRoute('update_projects');
+        return $this->redirectToRoute('update_projects', ['visibility' => $request->get('visibility')]);
     }
 
     /**

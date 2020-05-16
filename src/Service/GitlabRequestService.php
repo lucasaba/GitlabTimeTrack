@@ -59,7 +59,7 @@ class GitlabRequestService
      * @return array|mixed
      * @throws InvalidArgumentException
      */
-    public function getProjects()
+    public function getProjects(?string $visibility)
     {
         $cacheItem = $this->cache->getItem(self::CACHE_KEY);
         if ($cacheItem->isHit()) {
@@ -68,7 +68,7 @@ class GitlabRequestService
                 $cacheItem->get()
             );
         } else {
-            $projects = $this->getApiResult('/api/v4/projects');
+            $projects = $this->getApiResult('/api/v4/projects', $visibility);
             $this->logger->debug('Writing api result to cache');
             $cacheItem->set(json_encode($projects));
             $cacheItem->expiresAfter($this->cache_ttl);
@@ -92,7 +92,7 @@ class GitlabRequestService
      * @return array
      * @throws ClientException
      */
-    private function getApiResult(string $uri): array
+    private function getApiResult(string $uri, ?string $visibility = null): array
     {
         $nextPage = 1;
         $result = [];
@@ -103,6 +103,7 @@ class GitlabRequestService
                 $uri,
                 [
                     'query' => [
+                        'visibility' => $visibility,
                         'page' => $nextPage,
                         'per_page' => 100, // We use the max per page result as possible
                     ]

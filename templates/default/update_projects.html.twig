@@ -10,11 +10,31 @@
         <div class="col-md-8">
             <div class="box box-solid">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Projects</h3>
-                    <a href="{{ path('clear_projects_cache') }}" class="btn btn-primary pull-right">
-                        Clear cache
-                    </a>
+                    <h3 class="col-md-3 box-title">Projects</h3>
                 </div>
+                <div class="col-md-12">
+                    <span class="col-md-3">
+                        <a href="{{ path('clear_projects_cache', {'visibility': 'private'}) }}" class="btn btn-primary">
+                            Get Private projects only
+                        </a>
+                    </span>
+                    <span class="col-md-3">
+                        <a href="{{ path('clear_projects_cache', {'visibility': 'public'}) }}" class="btn btn-primary">
+                            Get Public projects only
+                        </a>
+                    </span>
+                    <span class="col-md-3">
+                        <a href="{{ path('clear_projects_cache', {'visibility': 'internal'}) }}" class="btn btn-primary">
+                            Get Internal projects only
+                        </a>
+                    </span>
+                    <span class="col-md-3">
+                        <a href="{{ path('clear_projects_cache') }}" class="btn btn-primary">
+                            Get All projects
+                        </a>
+                    </span>
+                </div>
+
                 {{ form_start(form) }}
                 <div class="box-body">
                     <table class="table table-hover">
