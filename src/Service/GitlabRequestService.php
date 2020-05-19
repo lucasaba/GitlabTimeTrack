@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Dto\GitlabResponseDto;
+use App\Entity\Issue;
 use App\Entity\Project;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -76,6 +77,35 @@ class GitlabRequestService
         }
 
         return $projects;
+    }
+
+    public function getProjectMilestones(Project $project)
+    {
+        $cacheItem = $this->cache->getItem(self::CACHE_KEY);
+        if ($cacheItem->isHit()) {
+            $this->logger->debug('Reading project milestones list from cache');
+            $milestones = json_decode(
+                $cacheItem->get()
+            );
+        } else {
+            $milestones = $this->getApiResult('/api/v4/projects/' . $project->getGitlabId() . '/milestones');
+            $this->logger->debug('Writing api result to cache');
+            $cacheItem->set(json_encode($milestones));
+            $cacheItem->expiresAfter($this->cache_ttl);
+            $this->cache->save($cacheItem);
+        }
+
+        return $milestones;
+    }
+
+    public function getProjectsIssues(Project $project): array
+    {
+        return $this->getApiResult('/api/v4/projects/'.$project->getGitlabId().'/issues');
+    }
+
+    public function getProjectsMilestones(Project $project): array
+    {
+        return $this->getApiResult('/api/v4/projects/'.$project->getGitlabId().'/milestones');
     }
 
     /**

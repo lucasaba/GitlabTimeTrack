@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Issue;
+use App\Entity\Milestone;
 use App\Entity\Project;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -34,6 +35,16 @@ class IssueRepository extends ServiceEntityRepository
              AND (i.timeEstimate > 0 OR i.totalTimeSpent > 0)
              ORDER BY i.gitlabId DESC'
         )->setParameter('project', $project)->getResult();
+    }
+
+    public function findTimedIssuesRelatedToMilestone(Milestone $milestone)
+    {
+        return $this->getEntityManager()->createQuery(
+            'SELECT i FROM App:Issue i 
+             WHERE i.milestone = :milestone 
+             AND (i.timeEstimate > 0 OR i.totalTimeSpent > 0)
+             ORDER BY i.gitlabId DESC'
+        )->setParameter('milestone', $milestone)->getResult();
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -38,6 +39,11 @@ class Issue
     private $project;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Milestone", inversedBy="issues")
+     * @var Milestone|null
+     */
+    private $milestone;
+
      * @ORM\Column(type="string", length=255)
      * @var string
      */
@@ -112,6 +118,16 @@ class Issue
         $this->project = $project;
 
         return $this;
+    }
+
+    public function getMilestone(): ?Milestone
+    {
+        return $this->milestone;
+    }
+
+    public function setMilestone(?Milestone $milestone): void
+    {
+        $this->milestone = $milestone;
     }
 
     public function getTitle(): ?string

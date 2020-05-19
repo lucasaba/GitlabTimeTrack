@@ -32,6 +32,12 @@ class Project
     private $issues;
 
     /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Milestone", mappedBy="project")
+     * @var ArrayCollection<Milestone>
+     */
+    private $milestones;
+
+    /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @var string|null
      */
@@ -52,6 +58,7 @@ class Project
     public function __construct()
     {
         $this->issues = new ArrayCollection();
+        $this->milestones = new ArrayCollection();
     }
 
     public function getId(): ?int

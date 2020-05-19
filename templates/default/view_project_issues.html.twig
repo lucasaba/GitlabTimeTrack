@@ -9,6 +9,13 @@
     {% set issuesTotalTimeSpent = 0 %}
     {% set issuesTimeEstimate = 0 %}
     <h2 class="page-header">Issues for project {{ project.name }}</h2>
+    {{ form_start(form) }}
+        {{ form_row(form) }}
+        <button type="submit" class="btn btn-primary">
+            <i class="fa fa-reload"></i>
+            Change Milestone
+        </button>
+    {{ form_end(form) }}
     <div class="row">
         <div class="col-md-8">
             <div class="box box-solid">
@@ -17,6 +24,9 @@
                 </div><!-- /.box-header -->
                 <div class="box-body">
                     {% for issue in issues %}
+                        <p>
+                            Milestone: <span class="badge">{{ issue.milestone ? issue.milestone.title : "No milestone"}}</span>
+                        </p>
                         <p>
                             Estimated: <span class="badge">{{ issue.timeEstimate|gitlab_time_format }}</span>
                             Spent: <span class="badge">{{ issue.totalTimeSpent|gitlab_time_format }}</span>

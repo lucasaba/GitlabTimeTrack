@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Issue;
+use App\Entity\Milestone;
 use App\Entity\Project;
+use App\Form\Type\ChooseMilestonesType;
 use App\Form\Type\ChooseProjectsType;
 use App\Service\GitlabRequestService;
 use DateTime;
@@ -125,11 +127,32 @@ class DefaultController extends AbstractController
      * @param Project $project
      * @return Response
      */
-    public function viewProjectAction(Project $project)
+    public function viewProjectAction(Request $request, Project $project)
     {
+        $milestones = $this->entityManager->getRepository(Milestone::class)->findBy(['project' => $project]);
+
+        $form = $this->createForm(ChooseMilestonesType::class, null, array(
+            'milestones' => $milestones
+        ));
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            $milestone = $this->entityManager->getRepository(Milestone::class)->find($request->request->get('choose_milestones')['milestone']);
+            $milestone ?
+                $issues = $this->entityManager->getRepository(Issue::class)->findTimedIssuesRelatedToMilestone($milestone) :
+                $issues = $this->entityManager->getRepository(Issue::class)->findTimedIssuesRelatedToProject($project);
+            ;
+            return $this->render('default/view_project_issues.html.twig', [
+                'form' => $form->createView(),
+                'issues' => $issues,
+                'project' => $project
+            ]);
+        }
+
         $issues = $this->entityManager->getRepository(Issue::class)->findTimedIssuesRelatedToProject($project);
 
         return $this->render('default/view_project_issues.html.twig', [
+            'form' => $form->createView(),
             'issues' => $issues,
             'project' => $project
         ]);
@@ -144,9 +167,10 @@ class DefaultController extends AbstractController
      */
     public function updateProjectIssues(Project $project)
     {
-        /**
-         * We need to fetch all project's issues from our GitLab server
-         */
+        $gitlabProjectMilestones = $this->gitlabRequestService->getProjectsMilestones($project);
+
+        $this->updateMilestones($project, $gitlabProjectMilestones);
+
         $gitlabProjectIssues = $this->gitlabRequestService->getProjectsIssues($project);
 
         list($inserted, $updated) = $this->updateIssues($project, $gitlabProjectIssues);
@@ -264,12 +288,6 @@ class DefaultController extends AbstractController
         $this->entityManager->flush();
     }
 
-    /**
-     * @param Project $project
-     * @param array $gitlabProjectIssues
-     * @return array
-     * @throws Exception
-     */
     private function updateIssues(Project $project, array $gitlabProjectIssues): array
     {
         $updated = 0;
@@ -278,7 +296,7 @@ class DefaultController extends AbstractController
             $newIssue = $this->entityManager->getRepository(Issue::class)
                 ->findOneBy(['gitlabId' => $issue->id]);
 
-            if ($newIssue == null) {
+            if ($newIssue === null) {
                 // We have to insert a new issue
                 $newIssue = new Issue();
                 $newIssue->setTitle($issue->title)
@@ -290,7 +308,6 @@ class DefaultController extends AbstractController
                     ->setStatus($issue->state)
                     ->setTimeEstimate($issue->time_stats->time_estimate)
                     ->setTotalTimeSpent($issue->time_stats->total_time_spent);
-                $this->entityManager->persist($newIssue);
                 $inserted++;
             } elseif ($newIssue instanceof Issue) {
                 /**
@@ -306,13 +323,62 @@ class DefaultController extends AbstractController
                         ->setUpdatedAt(new DateTime($issue->updated_at))
                         ->setTimeEstimate($issue->time_stats->time_estimate)
                         ->setTotalTimeSpent($issue->time_stats->total_time_spent);
-                    $this->entityManager->persist($newIssue);
                     $updated++;
                 }
+            }
+
+            $milestone = null;
+            if ($issue->milestone !== null) {
+                $milestone = $this->entityManager->getRepository(Milestone::class)
+                    ->findOneBy(['gitlabId' => $issue->milestone->id]);
+            }
+            $newIssue->setMilestone($milestone);
+            $this->entityManager->persist($newIssue);
+
+    private function updateMilestones(Project $project, array $gitlabMilestones): array
+    {
+
+        $updated = 0;
+        $inserted = 0;
+        foreach ($gitlabMilestones as $gitlabMilestone) {
+            $milestone = $this->entityManager->getRepository(Milestone::class)
+                ->findOneBy(['gitlabId' => $gitlabMilestone->id]);
+
+            if ($milestone === null) {
+                $milestone = new Milestone(
+                    $gitlabMilestone->id,
+                    $project,
+                    $gitlabMilestone->title,
+                    $this->gitlabTimeToW3CTime($gitlabMilestone->created_at),
+                    $this->gitlabTimeToW3CTime($gitlabMilestone->updated_at),
+                    $gitlabMilestone->due_date ? $this->gitlabTimeToW3CTime($gitlabMilestone->due_date) : null,
+                    $gitlabMilestone->start_date ? $this->gitlabTimeToW3CTime($gitlabMilestone->start_date) : null,
+                    $gitlabMilestone->state,
+                    $gitlabMilestone->description
+                );
+                $this->entityManager->persist($milestone);
+                $inserted++;
+            } elseif ($milestone instanceof Milestone) {
+                $lastUpdated = $this->gitlabTimeToW3CTime($gitlabMilestone->updated_at);
+                $updatedAt = $milestone->getUpdatedAt();
+                if ($updatedAt && $lastUpdated->getTimestamp() > $updatedAt->getTimestamp()) {
+                    $milestone->update(
+                        $gitlabMilestone->state,
+                        $gitlabMilestone->title,
+                        $gitlabMilestone->description,
+                        $this->gitlabTimeToW3CTime($gitlabMilestone->updated_at),
+                        $this->gitlabTimeToW3CTime($gitlabMilestone->due_date),
+                        $this->gitlabTimeToW3CTime($gitlabMilestone->start_date)
+                    );
+
+                    $updated++;
+                }
+                $this->entityManager->persist($milestone);
             }
         }
 
         $this->entityManager->flush();
         return array($inserted, $updated);
     }
+
 }
