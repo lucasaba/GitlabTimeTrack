@@ -112,9 +112,10 @@ class GitlabRequestService
      * @param Project $project
      * @return array
      */
-    public function getProjectsIssues(Project $project): array
+    public function getIssueNotes(Issue $issue): array
     {
-        return $this->getApiResult('/api/v4/projects/'.$project->getGitlabId().'/issues');
+        return $this->getApiResult('/api/v4/projects/'.$issue->getProject()->getGitlabId().
+            '/issues/'.$issue->getIssueNumber().'/notes');
     }
 
     /**

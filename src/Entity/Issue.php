@@ -44,6 +44,13 @@ class Issue
      */
     private $milestone;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Note", mappedBy="issue")
+     * @var ArrayCollection<Note>
+     */
+    private $notes;
+
+    /**
      * @ORM\Column(type="string", length=255)
      * @var string
      */
@@ -78,6 +85,11 @@ class Issue
      * @var string
      */
     private $status;
+
+    public function __construct()
+    {
+        $this->notes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -128,6 +140,38 @@ class Issue
     public function setMilestone(?Milestone $milestone): void
     {
         $this->milestone = $milestone;
+    }
+
+    /**
+     * @return ArrayCollection<Note>
+     */
+    public function getNotes()
+    {
+        return $this->notes;
+    }
+
+    public function addNote(Note $note): void
+    {
+        if (!$this->notes->contains($note)) {
+            $this->notes[] = $note;
+            $note->setIssue($this);
+        }
+    }
+
+    public function removeNote(Note $note): void
+    {
+        if ($this->notes->contains($note)) {
+            $this->notes->removeElement($note);
+            // set the owning side to null (unless already changed)
+            if ($note->getIssue() === $this) {
+                $note->setIssue(null);
+            }
+        }
+    }
+
+    public function clearNotes(): void
+    {
+        $this->notes->clear();
     }
 
     public function getTitle(): ?string

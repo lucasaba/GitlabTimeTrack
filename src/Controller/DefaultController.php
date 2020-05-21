@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Issue;
 use App\Entity\Milestone;
+use App\Entity\Note;
 use App\Entity\Project;
 use App\Form\Type\ChooseMilestonesType;
 use App\Form\Type\ChooseProjectsType;
@@ -325,6 +326,9 @@ class DefaultController extends AbstractController
                         ->setTotalTimeSpent($issue->time_stats->total_time_spent);
                     $updated++;
                 }
+                foreach($newIssue->getNotes() as $note) {
+                    $this->entityManager->remove($note);
+                }
             }
 
             $milestone = null;
@@ -334,6 +338,25 @@ class DefaultController extends AbstractController
             }
             $newIssue->setMilestone($milestone);
             $this->entityManager->persist($newIssue);
+
+            $gitlabIssuesNotes = $this->gitlabRequestService->getIssueNotes($newIssue);
+            foreach ($gitlabIssuesNotes as $gitlabIssuesNote) {
+                $note = new Note(
+                    $gitlabIssuesNote->id,
+                    $newIssue,
+                    $gitlabIssuesNote->body,
+                    $gitlabIssuesNote->author->id,
+                    $gitlabIssuesNote->system,
+                    $this->gitlabTimeToW3CTime($gitlabIssuesNote->created_at),
+                    $this->gitlabTimeToW3CTime($gitlabIssuesNote->updated_at)
+                );
+                $this->entityManager->persist($note);
+            }
+        }
+
+        $this->entityManager->flush();
+        return array($inserted, $updated);
+    }
 
     private function updateMilestones(Project $project, array $gitlabMilestones): array
     {
