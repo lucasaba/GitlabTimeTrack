@@ -86,9 +86,28 @@ class Issue
      */
     private $status;
 
-    public function __construct()
-    {
+    public function __construct(
+        string $title,
+        int $gitlabId,
+        int $issueNumber,
+        Project $project,
+        DateTimeInterface $createdAt,
+        DateTimeInterface $updatedAt,
+        string $status,
+        int $timeEstimate,
+        int $totalTimeSpent
+    ) {
         $this->notes = new ArrayCollection();
+
+        $this->title = $title;
+        $this->gitlabId = $gitlabId;
+        $this->issueNumber = $issueNumber;
+        $this->project = $project;
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
+        $this->status = $status;
+        $this->timeEstimate = $timeEstimate;
+        $this->totalTimeSpent = $totalTimeSpent;
     }
 
     public function getId(): ?int
@@ -101,35 +120,14 @@ class Issue
         return $this->gitlabId;
     }
 
-    public function setGitlabId(int $gitlabId): self
-    {
-        $this->gitlabId = $gitlabId;
-
-        return $this;
-    }
-
     public function getIssueNumber(): ?int
     {
         return $this->issueNumber;
     }
 
-    public function setIssueNumber(int $issueNumber): self
-    {
-        $this->issueNumber = $issueNumber;
-
-        return $this;
-    }
-
     public function getProject(): ?Project
     {
         return $this->project;
-    }
-
-    public function setProject(?Project $project): self
-    {
-        $this->project = $project;
-
-        return $this;
     }
 
     public function getMilestone(): ?Milestone
@@ -179,23 +177,9 @@ class Issue
         return $this->title;
     }
 
-    public function setTitle(string $title): self
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
     public function getTimeEstimate(): ?int
     {
         return $this->timeEstimate;
-    }
-
-    public function setTimeEstimate(int $timeEstimate): self
-    {
-        $this->timeEstimate = $timeEstimate;
-
-        return $this;
     }
 
     public function getTotalTimeSpent(): ?int
@@ -203,23 +187,9 @@ class Issue
         return $this->totalTimeSpent;
     }
 
-    public function setTotalTimeSpent(int $totalTimeSpent): self
-    {
-        $this->totalTimeSpent = $totalTimeSpent;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
-    }
-
-    public function setCreatedAt(DateTimeInterface $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
     }
 
     public function getUpdatedAt(): ?DateTimeInterface
@@ -227,22 +197,20 @@ class Issue
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(DateTimeInterface $updatedAt): self
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
-
     public function getStatus(): ?string
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): self
-    {
+    public function update(
+        string $status,
+        DateTimeInterface $updatedAt,
+        int $timeEstimate,
+        int $totalTimeSpent
+    ): void  {
         $this->status = $status;
-
-        return $this;
+        $this->updatedAt = $updatedAt;
+        $this->timeEstimate = $timeEstimate;
+        $this->totalTimeSpent = $totalTimeSpent;
     }
 }

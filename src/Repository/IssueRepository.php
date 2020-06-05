@@ -23,27 +23,21 @@ class IssueRepository extends ServiceEntityRepository
         parent::__construct($registry, Issue::class);
     }
 
-    /**
-     * @param Project $project
-     * @return mixed
-     */
-    public function findTimedIssuesRelatedToProject(Project $project)
+    public function findIssuesRelatedToProject(Project $project)
     {
         return $this->getEntityManager()->createQuery(
             'SELECT i FROM App:Issue i 
              WHERE i.project = :project 
-             AND (i.timeEstimate > 0 OR i.totalTimeSpent > 0)
-             ORDER BY i.gitlabId DESC'
+             ORDER BY i.createdAt ASC'
         )->setParameter('project', $project)->getResult();
     }
 
-    public function findTimedIssuesRelatedToMilestone(Milestone $milestone)
+    public function findIssuesRelatedToMilestone(Milestone $milestone)
     {
         return $this->getEntityManager()->createQuery(
             'SELECT i FROM App:Issue i 
              WHERE i.milestone = :milestone 
-             AND (i.timeEstimate > 0 OR i.totalTimeSpent > 0)
-             ORDER BY i.gitlabId DESC'
+             ORDER BY i.createdAt ASC'
         )->setParameter('milestone', $milestone)->getResult();
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\EventSubscriber;
 
+use App\Entity\Milestone;
 use App\Entity\Project;
 use Doctrine\ORM\EntityManagerInterface;
 use KevinPapst\AdminLTEBundle\Event\SidebarMenuEvent;
@@ -62,15 +63,41 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
             /**
              * @var $project Project
              */
-            $event->addItem(
-                new MenuItemModel(
-                    'project-'.$project->getGitlabId(),
-                    $project->getName(),
-                    'view_project',
-                    array('id' => $project->getId()),
-                    'fa fa-archive'
-                )
+            $projectMenu = new MenuItemModel(
+                'project-'.$project->getGitlabId(),
+                $project->getName(),
+                null,
+                array('id' => $project->getId()),
+                'fa fa-project-diagram'
             );
+
+            $projectMenu->addChild(new MenuItemModel(
+                'view-project-'.$project->getGitlabId(),
+                $project->getName(),
+                'view_project',
+                ['id' => $project->getId()],
+                'fa fa-eye'
+            ));
+
+            $projectMenu->addChild(new MenuItemModel(
+                'update-milestones-list-id',
+                'Update milestones list',
+                'update_milestones',
+                ['id' => $project->getId()],
+                'fas fa-sync'
+            ));
+            $milestones = $this->entityManager->getRepository(Milestone::class)
+                ->findBy(['project' => $project], ['title' => 'ASC']);
+            foreach ($milestones as $milestone) {
+                $projectMenu->addChild(new MenuItemModel(
+                    'milestone-'.$milestone->getGitlabId(),
+                    $milestone->getTitle() ? $milestone->getTitle() : 'No title',
+                    'view_milestone',
+                    array('id' => $milestone->getId()),
+                    'fa fa-archive'
+                ));
+            }
+            $event->addItem($projectMenu);
         }
 
         $request = $event->getRequest();

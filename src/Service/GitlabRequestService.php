@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Dto\GitlabResponseDto;
 use App\Entity\Issue;
+use App\Entity\Milestone;
 use App\Entity\Project;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -98,9 +99,10 @@ class GitlabRequestService
         return $milestones;
     }
 
-    public function getProjectsIssues(Project $project): array
+    public function getProjectsIssues(Project $project, ?Milestone $milestone): array
     {
-        return $this->getApiResult('/api/v4/projects/'.$project->getGitlabId().'/issues');
+        return $this->getApiResult('/api/v4/projects/'.
+            $project->getGitlabId().'/issues', null, $milestone ? $milestone->getTitle() : null);
     }
 
     public function getProjectsMilestones(Project $project): array
@@ -123,7 +125,7 @@ class GitlabRequestService
      * @return array
      * @throws ClientException
      */
-    private function getApiResult(string $uri, ?string $visibility = null): array
+    private function getApiResult(string $uri, ?string $visibility = null, ?string $milestone = null): array
     {
         $nextPage = 1;
         $result = [];
@@ -137,6 +139,7 @@ class GitlabRequestService
                         'visibility' => $visibility,
                         'page' => $nextPage,
                         'per_page' => 100, // We use the max per page result as possible
+                        'milestone' => $milestone
                     ]
                 ]
             ));

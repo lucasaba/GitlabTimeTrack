@@ -1,11 +1,15 @@
 <?php
 namespace App\Twig;
 
+use CMEN\GoogleChartsBundle\GoogleCharts\Options\Days;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
 class AppExtension extends AbstractExtension
 {
+    const DAYS_PER_WEEK = 5;
+    const HOURS_PER_DAY = 8;
+
     /**
      * @return array|TwigFilter[]
      */
@@ -28,11 +32,17 @@ class AppExtension extends AbstractExtension
             return '0';
         }
         $output = '';
-        $days = (int) floor($number/(60*60*24));
+        $days = (int) floor($number / (60*60*self::HOURS_PER_DAY));
+        if ($days >= self::DAYS_PER_WEEK) {
+            $weeks = (int) floor($days / self::DAYS_PER_WEEK);
+            $days -= $weeks * self::DAYS_PER_WEEK;
+            $output .= $weeks . 'w ';
+            $number -= $weeks * self::DAYS_PER_WEEK*60*60*self::HOURS_PER_DAY;
+        }
         if ($days > 0) {
             $output .= $days . 'd ';
+            $number -= $days*60*60*self::HOURS_PER_DAY;
         }
-        $number -= $days*60*60*24;
 
         $output .= gmdate('G\\h i\\m', $number);
 

@@ -29,3 +29,9 @@ services:
     App\Service\GitlabRequestService:
         arguments:
             $client: '@eight_points_guzzle.client.api_gitlab'
+
+    App\Service\Chart\ChartData:
+        arguments: ['@doctrine.orm.entity_manager']
+
+    App\Service\Chart\Chart:
+        arguments: ['@App\Service\Chart\ChartData']

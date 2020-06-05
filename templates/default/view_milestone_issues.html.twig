@@ -1,14 +1,15 @@
 {% extends 'base.html.twig' %}
 
 {% block page_subtitle %}
-    Project {{ project.name }} Issues
+    Project {{ milestone.project.name }} <br>
+    Milestone {{ milestone.title }} Issues
 {% endblock %}
 
 {% block page_content %}
     {% set issuesCount = 0 %}
     {% set issuesTotalTimeSpent = 0 %}
     {% set issuesTimeEstimate = 0 %}
-    <h2 class="page-header">Issues for project {{ project.name }}</h2>
+    <h2 class="page-header">Issues for milestone {{ milestone.title }}</h2>
     <div class="row">
         <div class="col-md-8">
             <div class="box box-solid">
@@ -80,13 +81,9 @@
                         <li>Total estimated time: {{ issuesTimeEstimate|gitlab_time_format }}</li>
                         <li>Total time spent: {{ issuesTotalTimeSpent|gitlab_time_format }}</li>
                     </ul>
-                    <a href="{{ path('update_projects_issues', {'id': project.id, 'milestone' : null}) }}" class="btn btn-primary">
+                    <a href="{{ path('update_milestone_issues', {'id' : milestone.id}) }}" class="btn btn-primary">
                         <i class="fa fa-refresh"></i>
                         Update
-                    </a>
-                    <a href="{{ path('export_project_to_pdf', {'id': project.id}) }}" class="btn btn-primary">
-                        <i class="fa fa-file-pdf-o"></i>
-                        Export to PDF
                     </a>
                 </div>
             </div>

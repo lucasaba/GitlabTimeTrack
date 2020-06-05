@@ -16,6 +16,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
+        "cmen/google-charts-bundle": "^3.2",
         "eightpoints/guzzle-bundle": "^8.0",
         "kevinpapst/adminlte-bundle": "^3.2",
         "knplabs/knp-snappy-bundle": "^1.7",
