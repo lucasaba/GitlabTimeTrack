@@ -17,4 +17,6 @@ RUN groupadd -g 1000 user \
     && useradd -u 1000 -g 1000 -d /home/user -s /bin/bash user \
     && chown user: /home/user
 
+WORKDIR /var/www
+
 USER user

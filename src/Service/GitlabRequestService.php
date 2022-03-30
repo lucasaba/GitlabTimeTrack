@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Dto\GitlabResponseDto;
 use App\Entity\Project;
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -17,7 +17,7 @@ class GitlabRequestService
     public const CACHE_KEY = 'gitlab.projects_list';
 
     /**
-     * @var Client
+     * @var ClientInterface
      */
     private $client;
 
@@ -37,7 +37,7 @@ class GitlabRequestService
     private $logger;
 
     public function __construct(
-        Client $client,
+        ClientInterface $client,
         LoggerInterface $logger,
         int $cache_ttl = 3600,
         AdapterInterface $cache = null
